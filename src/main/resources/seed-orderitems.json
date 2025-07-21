@@ -1,0 +1,26 @@
+[
+  {
+    "quantity": 2,
+    "unitPrice": 8.99,
+    "totalPrice": 17.98,
+    "foodItem": "Cheeseburger"
+  },
+  {
+    "quantity": 1,
+    "unitPrice": 3.50,
+    "totalPrice": 3.50,
+    "foodItem": "French Fries"
+  },
+  {
+    "quantity": 1,
+    "unitPrice": 6.00,
+    "totalPrice": 6.00,
+    "foodItem": "Caesar Salad"
+  },
+  {
+    "quantity": 1,
+    "unitPrice": 6.00,
+    "totalPrice": 6.00,
+    "foodItem": "Lentil Soup"
+  }
+]

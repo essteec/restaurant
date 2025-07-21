@@ -1,0 +1,17 @@
+[
+  {
+    "menuName": "Lunch Menu",
+    "description": "Available from 12:00 to 15:00. Includes main courses and salads.",
+    "active": true
+  },
+  {
+    "menuName": "Dinner Menu",
+    "description": "Available from 18:00 to 23:00. Includes grill and desserts.",
+    "active": true
+  },
+  {
+    "menuName": "Kids Menu",
+    "description": "Special menu for children under 12.",
+    "active": false
+  }
+]

@@ -1,0 +1,17 @@
+[
+  {
+    "type": "Service",
+    "status": "OPEN",
+    "createdAt": "2024-06-01T12:45:00"
+  },
+  {
+    "type": "Bill",
+    "status": "CLOSED",
+    "createdAt": "2024-06-01T13:00:00"
+  },
+  {
+    "type": "Water",
+    "status": "OPEN",
+    "createdAt": "2024-06-01T13:10:00"
+  }
+]

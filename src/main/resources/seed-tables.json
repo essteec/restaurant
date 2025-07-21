@@ -1,0 +1,7 @@
+[
+  { "number": "7A", "status": "AVAILABLE" },
+  { "number": "8A", "status": "OCCUPIED" },
+  { "number": "7B", "status": "NEEDS_CLEANING" },
+  { "number": "8B", "status": "AVAILABLE" },
+  { "number": "9A", "status": "OCCUPIED" }
+]

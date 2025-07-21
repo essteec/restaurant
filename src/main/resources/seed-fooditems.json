@@ -1,0 +1,37 @@
+[
+  {
+    "foodName": "Cheeseburger",
+    "description": "Juicy grilled beef patty with cheese, lettuce, tomato, and onion.",
+    "price": 8.99
+  },
+  {
+    "foodName": "French Fries",
+    "description": "Crispy golden fries with a pinch of salt.",
+    "price": 3.50
+  },
+  {
+    "foodName": "Caesar Salad",
+    "description": "Fresh romaine lettuce, parmesan, croutons, and Caesar dressing.",
+    "price": 6.00
+  },
+  {
+    "foodName": "Lentil Soup",
+    "description": "Traditional Turkish lentil soup served with lemon.",
+    "price": 4.00
+  },
+  {
+    "foodName": "Grilled Chicken",
+    "description": "Marinated chicken breast grilled to perfection.",
+    "price": 10.50
+  },
+  {
+    "foodName": "Chocolate Cake",
+    "description": "Rich chocolate layered cake with ganache.",
+    "price": 5.00
+  },
+  {
+    "foodName": "Cola",
+    "description": "Chilled soft drink.",
+    "price": 2.00
+  }
+]

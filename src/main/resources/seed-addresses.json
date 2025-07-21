@@ -1,0 +1,35 @@
+[
+  {
+    "name": "Home",
+    "country": "Turkey",
+    "city": "Istanbul",
+    "province": "Marmara",
+    "subprovince": "Kadikoy",
+    "district": "Moda",
+    "street": "Bahariye",
+    "apartment": "12A",
+    "description": "Near the park"
+  },
+  {
+    "name": "Work",
+    "country": "Turkey",
+    "city": "Istanbul",
+    "province": "Marmara",
+    "subprovince": "Sisli",
+    "district": "Mecidiyekoy",
+    "street": "Buyukdere",
+    "apartment": "Office 101",
+    "description": "Next to the mall"
+  },
+  {
+    "name": "Summer House",
+    "country": "Turkey",
+    "city": "Izmir",
+    "province": "Aegean",
+    "subprovince": "Cesme",
+    "district": "Ilica",
+    "street": "Deniz",
+    "apartment": "Villa 5",
+    "description": "By the sea"
+  }
+]

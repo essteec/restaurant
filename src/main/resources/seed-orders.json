@@ -1,0 +1,18 @@
+[
+  {
+    "orderTime": "2024-06-01T12:30:00",
+    "status": "PREPARING",
+    "totalPrice": "17.49",
+    "notes": "No onions on burger",
+    "customer": "rick@gmail.com",
+    "address": "Home"
+  },
+  {
+    "orderTime": "2024-06-01T13:15:00",
+    "status": "COMPLETED",
+    "totalPrice": "12.00",
+    "notes": "Extra cheese on salad",
+    "customer": "m.jackson@gmail.com",
+    "address": "Work"
+  }
+]
