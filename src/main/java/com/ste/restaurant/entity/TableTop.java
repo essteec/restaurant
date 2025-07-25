@@ -15,5 +15,5 @@ public class TableTop {
     private String tableNumber;
 
     @Enumerated(EnumType.STRING)
-    private TableStatus tableStatus = TableStatus.valueOf("AVAILABLE");
+    private TableStatus tableStatus = TableStatus.AVAILABLE;
 }

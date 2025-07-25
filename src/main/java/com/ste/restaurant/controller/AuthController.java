@@ -1,4 +1,4 @@
-package com.ste.restaurant.controller.impl;
+package com.ste.restaurant.controller;
 
 import com.ste.restaurant.dto.auth.AuthRequest;
 import com.ste.restaurant.dto.auth.AuthResponse;
@@ -73,7 +73,6 @@ public class AuthController {
         user.setRole(UserRole.CUSTOMER);
 
         userRepository.save(user);
-
         String token = jwtUtil.generateToken(user);
         return ResponseEntity.ok(new AuthResponse(token));
     }

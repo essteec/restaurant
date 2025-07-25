@@ -1,4 +1,5 @@
 /src/main/resources/env.properties
+/src/main/resources/static
 
 HELP.md
 target/

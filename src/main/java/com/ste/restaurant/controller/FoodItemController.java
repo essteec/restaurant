@@ -1,51 +1,56 @@
-package com.ste.restaurant.controller.impl;
+package com.ste.restaurant.controller;
 
-import com.ste.restaurant.dto.CategoryDto;
 import com.ste.restaurant.dto.CategoryDtoBasic;
 import com.ste.restaurant.dto.FoodItemDto;
-import com.ste.restaurant.service.impl.FoodItemService;
+import com.ste.restaurant.service.FoodItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Set;
 
-@RequestMapping("/rest/api/food/")
+@RequestMapping("/rest/api/food-items/")
 @RestController
-@PreAuthorize("hasRole('ADMIN')")
 public class FoodItemController {
     @Autowired
     private FoodItemService foodItemService;
 
-    @PostMapping(path = "/save-fooditem")
+    @PostMapping
     public FoodItemDto saveFoodItem(@RequestBody FoodItemDto foodItem) {
         return foodItemService.saveFoodItem(foodItem);
     }
 
-    @GetMapping(path = "/fooditem-list")
+    @GetMapping
     public List<FoodItemDto> getAllFoodItems() {
         return foodItemService.getAllFoodItems();
     }
 
-    @GetMapping(path = "/fooditems/by-name")
+    @GetMapping(path = "/by-name")
     public FoodItemDto getFoodItemByName(@RequestParam String name) {
         return foodItemService.getFoodItemByName(name);
     }
 
-    @DeleteMapping(path = "/fooditem/{name}")
+    @DeleteMapping(path = "/{name}")
     public FoodItemDto deleteFoodItemByName(@PathVariable String name) {
         return foodItemService.deleteFoodItemByName(name);
     }
 
-    @PutMapping(path = "/fooditem-update/{name}")
+    @PutMapping(path = "/{name}")
     public FoodItemDto updateFoodItemById(@PathVariable String name, @RequestBody FoodItemDto foodItem) {
         return foodItemService.updateFoodItemByName(name, foodItem);
     }
 
     // relation manyToMany foodItem -> category
-    @GetMapping(path = "/fooditems/{foodName}/categories")
-    public List<CategoryDtoBasic> getCategoriesOfFoodItem(@PathVariable String foodName) {
-        return foodItemService.getCategories(foodName);
+    @PreAuthorize("permitAll()")
+    @GetMapping(path = "/{name}/categories")
+    public List<CategoryDtoBasic> getCategoriesOfFoodItem(@PathVariable String name) {
+        return foodItemService.getCategories(name);
+    }
+
+    // get image
+    @PostMapping(path = "/{name}/image")
+    public FoodItemDto uploadFoodImage(@PathVariable String name, @RequestParam("image") MultipartFile imageFile) {
+        return foodItemService.addImageToFood(name, imageFile);
     }
 }

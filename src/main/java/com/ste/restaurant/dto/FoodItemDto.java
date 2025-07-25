@@ -14,6 +14,8 @@ import java.util.Set;
 public class FoodItemDto {
     private String foodName;
 
+    private String image;
+
     private String description;
 
     private BigDecimal price;

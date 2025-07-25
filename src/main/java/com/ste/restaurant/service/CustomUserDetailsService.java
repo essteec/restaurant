@@ -1,16 +1,12 @@
-package com.ste.restaurant.service.impl;
+package com.ste.restaurant.service;
 
 import com.ste.restaurant.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import com.ste.restaurant.entity.User;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {

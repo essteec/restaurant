@@ -35,7 +35,7 @@ public class Order {
     @JoinColumn(name = "address_id")
     private Address address;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems;
 
     @ManyToOne

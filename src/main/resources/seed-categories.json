@@ -1,9 +1,9 @@
 [
-  { "categoryName": "Appetizers" },
-  { "categoryName": "Main Course" },
-  { "categoryName": "Desserts" },
-  { "categoryName": "Beverages" },
-  { "categoryName": "Salads" },
-  { "categoryName": "Soups" },
-  { "categoryName": "Grill" }
+  { "categoryName": "Appetizers", "foodItems": ["French Fries"] },
+  { "categoryName": "Main Course", "foodItems": ["Cheeseburger", "Grilled Chicken"] },
+  { "categoryName": "Desserts", "foodItems": ["Chocolate Cake"] },
+  { "categoryName": "Beverages", "foodItems": ["Cola"] },
+  { "categoryName": "Salads", "foodItems": ["Caesar Salad"] },
+  { "categoryName": "Soups", "foodItems": ["Lentil Soup"] },
+  { "categoryName": "Grill", "foodItems": ["Grilled Chicken"] }
 ]

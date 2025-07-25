@@ -1,48 +1,62 @@
-package com.ste.restaurant.controller.impl;
+package com.ste.restaurant.controller;
 
 import com.ste.restaurant.dto.TableTopDto;
-import com.ste.restaurant.service.impl.TableTopService;
+import com.ste.restaurant.service.TableTopService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RequestMapping("/rest/api/tabletop")
+@RequestMapping("/rest/api/tables")
 @RestController
-@PreAuthorize("hasRole('ADMIN')")
 public class TableTopController {
 
     @Autowired
     TableTopService tableTopService;
 
-    @PostMapping(path = "/save-table")
+    // by admin
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping
     public TableTopDto saveTable(@RequestBody TableTopDto tableTopDto) {
         return tableTopService.saveTable(tableTopDto);
     }
 
-    @GetMapping(path = "/table-list")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping
     public List<TableTopDto> getAllTables() {
         return tableTopService.getAllTables();
     }
 
-    @GetMapping(path = "/tables/by-name")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping(path = "/by-name")
     public TableTopDto getTableByName(@RequestParam String name) {
         return tableTopService.getTableByName(name);
     }
 
-    @DeleteMapping(path = "/tables/{name}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping(path = "/{name}")
     public TableTopDto deleteTableByName(@PathVariable String name) {
         return tableTopService.deleteTableByName(name);
     }
 
-    @PutMapping(path = "/table-update/{name}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping(path = "/{name}")
     public TableTopDto updateTable(@PathVariable String name, @RequestBody TableTopDto tableTopDto) {
         return tableTopService.updateTable(name, tableTopDto);
     }
 
-    @PatchMapping(path = "/tables/{name}/status")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WAITER')")
+    @PatchMapping(path = "/{name}/status")
     public TableTopDto updateTableStatus(@PathVariable String name, @RequestBody String role) {
         return tableTopService.updateTableStatusByName(name, role);
     }
+
+    // by customer
+    @PreAuthorize("permitAll()")
+    @GetMapping(path = "/available")
+    public List<TableTopDto> getAvailableTables() {
+        return tableTopService.getAvailableTables();
+    }
+
 }

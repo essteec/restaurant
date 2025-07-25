@@ -1,4 +1,4 @@
-package com.ste.restaurant.service.impl;
+package com.ste.restaurant.service;
 
 import com.ste.restaurant.dto.CategoryDto;
 import com.ste.restaurant.dto.CategoryDtoBasic;

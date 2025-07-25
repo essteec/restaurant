@@ -1,10 +1,12 @@
-package com.ste.restaurant.service.impl;
+package com.ste.restaurant.service;
 
 import com.ste.restaurant.dto.FoodItemDto;
 import com.ste.restaurant.dto.MenuDto;
 import com.ste.restaurant.dto.MenuDtoBasic;
+import com.ste.restaurant.entity.Category;
 import com.ste.restaurant.entity.FoodItem;
 import com.ste.restaurant.entity.Menu;
+import com.ste.restaurant.repository.CategoryRepository;
 import com.ste.restaurant.repository.FoodItemRepository;
 import com.ste.restaurant.repository.MenuRepository;
 import org.springframework.beans.BeanUtils;
@@ -21,6 +23,8 @@ public class MenuService {
 
     @Autowired
     private FoodItemRepository foodItemRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     public MenuDtoBasic saveMenu(MenuDtoBasic menu) {
         if (menu.getMenuName() == null) {
@@ -150,6 +154,38 @@ public class MenuService {
                 menuDto.getFoodItems().add(foodItemDto);
             }
             menuDtos.add(menuDto);
+        }
+        return menuDtos;
+    }
+
+    public List<MenuDto> getActiveMenuByCategory(String categoryName) {
+        Category category = categoryRepository.getCategoriesByCategoryName(categoryName);
+        if (category == null) {
+            return Collections.emptyList();
+        }
+        Set<FoodItem> categoryFoodItems = category.getFoodItems();
+
+        List<Menu> menus = menuRepository.findAllByActive(true);
+        List<MenuDto> menuDtos = new ArrayList<>();
+
+        for (Menu menu : menus) {
+            Set<FoodItem> filteredFoodItems = new HashSet<>();
+            for (FoodItem foodItem : menu.getFoodItems()) {
+                if (categoryFoodItems.contains(foodItem)) {
+                    filteredFoodItems.add(foodItem);
+                }
+            }
+            if (!filteredFoodItems.isEmpty()) {
+                MenuDto menuDto = new MenuDto();
+                BeanUtils.copyProperties(menu, menuDto);
+                menuDto.setFoodItems(new HashSet<>());
+                for (FoodItem foodItem : filteredFoodItems) {
+                    FoodItemDto foodItemDto = new FoodItemDto();
+                    BeanUtils.copyProperties(foodItem, foodItemDto);
+                    menuDto.getFoodItems().add(foodItemDto);
+                }
+                menuDtos.add(menuDto);
+            }
         }
         return menuDtos;
     }

@@ -5,7 +5,8 @@
     "totalPrice": "17.49",
     "notes": "No onions on burger",
     "customer": "rick@gmail.com",
-    "address": "Home"
+    "address": "Home",
+    "table": "7A"
   },
   {
     "orderTime": "2024-06-01T13:15:00",
@@ -13,6 +14,7 @@
     "totalPrice": "12.00",
     "notes": "Extra cheese on salad",
     "customer": "m.jackson@gmail.com",
-    "address": "Work"
+    "address": "Work",
+    "table": "8A"
   }
 ]

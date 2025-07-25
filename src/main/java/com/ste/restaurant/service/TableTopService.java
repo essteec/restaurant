@@ -1,4 +1,4 @@
-package com.ste.restaurant.service.impl;
+package com.ste.restaurant.service;
 
 import com.ste.restaurant.dto.TableTopDto;
 import com.ste.restaurant.entity.TableStatus;
@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,8 +29,10 @@ public class TableTopService {
             return null;
         }
         TableTop tableTop = new TableTop();
-        BeanUtils.copyProperties(tableTopDto, tableTop);
-        tableRepository.save(tableTop);
+        BeanUtils.copyProperties(tableTopDto, tableTop,
+                ServiceUtil.getNullPropertyNames(tableTopDto));
+        TableTop savedTable = tableRepository.save(tableTop);
+        BeanUtils.copyProperties(savedTable, tableTopDto);
         return tableTopDto;
     }
 
@@ -62,9 +63,10 @@ public class TableTopService {
         if (tableTop.isEmpty()) {
             return null;
         }
-        tableRepository.deleteByTableNumber(name);
+        TableTop table = tableTop.get();
+        tableRepository.delete(table);
         TableTopDto tableTopDto = new TableTopDto();
-        BeanUtils.copyProperties(tableTop.get(), tableTopDto);
+        BeanUtils.copyProperties(table, tableTopDto);
         return tableTopDto;
     }
 

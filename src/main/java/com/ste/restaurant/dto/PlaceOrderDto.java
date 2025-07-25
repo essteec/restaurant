@@ -8,7 +8,9 @@ import java.util.List;
 public class PlaceOrderDto {
     private String notes;
 
-    private AddressDto address;
+    private Long addressId;
 
-    private List<OrderItemDto> orderItems;
+    private String tableNumber;
+
+    private List<OrderItemDtoBasic> orderItems;
 }

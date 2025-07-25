@@ -23,5 +23,4 @@ public class OrderItemDto {
     private String note;
 
     private FoodItemDto foodItem;
-
 }

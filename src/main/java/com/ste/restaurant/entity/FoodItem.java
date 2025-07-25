@@ -21,6 +21,8 @@ public class FoodItem {
     @Column(name = "food_name")
     private String foodName;
 
+    private String image;
+
     private String description;
 
     private BigDecimal price;

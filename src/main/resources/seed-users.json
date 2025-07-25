@@ -7,11 +7,11 @@
     "role": "ADMIN"
   },
   {
-  "firstName": "Admin",
-  "lastName": "Hamdi",
-  "email": "hamdi@babaninyeri.com",
-  "password": "h123",
-  "role": "ADMIN"
+    "firstName": "Admin",
+    "lastName": "Hamdi",
+    "email": "hamdi@babaninyeri.com",
+    "password": "h123",
+    "role": "ADMIN"
   },
   {
     "firstName": "Bulent",
@@ -32,14 +32,16 @@
     "lastName": "Dawson",
     "email": "rick@gmail.com",
     "password": "rd0",
-    "role": "CUSTOMER"
+    "role": "CUSTOMER",
+    "addresses": ["Home"]
   },
   {
     "firstName": "Micheal",
     "lastName": "Jackson",
     "email": "m.jackson@gmail.com",
     "password": "mj0",
-    "role": "VIP_CUSTOMER"
+    "role": "VIP_CUSTOMER",
+    "addresses": ["Work"]
   },
   {
     "firstName": "Ayse",
@@ -50,7 +52,7 @@
     "birthday": "1998-02-20",
     "loyaltyPoints": 45,
     "salary": null,
-    "lastLogin": "2024-05-31T17:45:00"
+    "addresses": ["Summer House"]
   },
   {
     "firstName": "John",
@@ -61,7 +63,6 @@
     "birthday": "1992-12-01",
     "loyaltyPoints": null,
     "salary": 3400.00,
-    "lastLogin": "2024-06-01T09:30:00",
     "addresses": []
   },
   {
@@ -73,7 +74,7 @@
     "birthday": "1990-06-15",
     "loyaltyPoints": null,
     "salary": 4800.00,
-    "lastLogin": "2024-06-01T07:45:00"
+    "addresses": []
   },
   {
     "firstName": "Elif",
@@ -84,6 +85,6 @@
     "birthday": "1993-09-10",
     "loyaltyPoints": 300,
     "salary": null,
-    "lastLogin": "2024-06-01T14:00:00"
+    "addresses": []
   }
 ]

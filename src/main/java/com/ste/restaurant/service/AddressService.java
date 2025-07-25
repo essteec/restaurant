@@ -1,4 +1,4 @@
-package com.ste.restaurant.service.impl;
+package com.ste.restaurant.service;
 
 
 import com.ste.restaurant.dto.AddressDto;
@@ -9,6 +9,7 @@ import com.ste.restaurant.repository.UserRepository;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,35 @@ public class AddressService {
     @Autowired
     UserRepository userRepository;
 
+    // admin
+    public List<AddressDto> getAddressesOfUser(Long userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("No user!"));
+
+        return getAddresses(user.getEmail());
+    }
+
+    public AddressDto deleteAddressById(Long userId, Long addressId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Address address = addressRepository.findById(addressId)
+                .orElseThrow(() -> new RuntimeException("Address not found"));
+
+        if (!user.getAddresses().contains(address)) {
+            throw new RuntimeException("Address not belong to this user");
+        }
+
+        user.getAddresses().remove(address);
+        userRepository.save(user);
+
+        AddressDto addressDto = new AddressDto();
+        BeanUtils.copyProperties(address, addressDto);
+        addressRepository.delete(address);
+        return addressDto;
+    }
+
+    // customer
     @Transactional
     public AddressDto saveAddress(AddressDto addressDto, String email) {
         User user = userRepository.findByEmail(email)
@@ -42,11 +72,10 @@ public class AddressService {
     }
 
     public List<AddressDto> getAddresses(String email) {
-        List<AddressDto> addressDtos = new ArrayList<>();
-
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        List<AddressDto> addressDtos = new ArrayList<>();
         List<Address> addresses = user.getAddresses();
         for (Address address : addresses) {
             AddressDto addressDto = new AddressDto();
@@ -69,6 +98,7 @@ public class AddressService {
         }
 
         user.getAddresses().remove(address);
+        addressRepository.delete(address);
         userRepository.save(user);
 
         AddressDto addressDto = new AddressDto();

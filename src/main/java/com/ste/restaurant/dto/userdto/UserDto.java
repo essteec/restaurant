@@ -15,6 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDto {
+    private Long id;
     private String firstName;
     private String lastName;
     private UserRole Role;
@@ -22,6 +23,5 @@ public class UserDto {
     private Date birthday;
     private Integer loyaltyPoints;
     private BigDecimal salary;
-    private LocalDateTime lastLogin;
     private List<Address> addressList;
 }

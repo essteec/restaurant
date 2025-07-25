@@ -14,9 +14,21 @@ public class CallRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long callRequestId;
 
-    private String type;
+    @Enumerated(EnumType.STRING)
+    private RequestType type;
 
-    private String status;
+    private String message;
+
+    @JoinColumn(name = "active")
+    private boolean active = true;
+
+    @ManyToOne
+    @JoinColumn(name = "table_id")
+    private TableTop table;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User customer;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

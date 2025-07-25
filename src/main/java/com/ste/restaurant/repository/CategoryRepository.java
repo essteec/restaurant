@@ -17,4 +17,6 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
      Optional<Category> findByCategoryName(String categoryName);
 
     List<Category> getCategoriesByFoodItems(Set<FoodItem> foodItems);
+
+    Category getCategoriesByCategoryName(String categoryName);
 }

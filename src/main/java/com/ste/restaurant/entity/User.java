@@ -43,9 +43,6 @@ public class User {
     @Column(name = "salary")
     private BigDecimal salary;
 
-    @Column(name = "last_login_time")
-    private LocalDateTime lastLogin;
-
     @OneToMany
     @JoinTable(name = "user_address",
             joinColumns = @JoinColumn(name = "user_id"),
