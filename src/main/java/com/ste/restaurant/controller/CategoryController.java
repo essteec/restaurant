@@ -2,7 +2,10 @@ package com.ste.restaurant.controller;
 
 import com.ste.restaurant.dto.CategoryDto;
 import com.ste.restaurant.dto.CategoryDtoBasic;
+import com.ste.restaurant.dto.StringsDto;
+import com.ste.restaurant.dto.WarningResponse;
 import com.ste.restaurant.service.CategoryService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +23,7 @@ public class CategoryController {
     // Category Management
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public CategoryDtoBasic saveCategory(@RequestBody CategoryDtoBasic category) {
+    public CategoryDtoBasic saveCategory(@Valid @RequestBody CategoryDtoBasic category) {
         return categoryService.saveCategory(category);
     }
 
@@ -37,20 +40,20 @@ public class CategoryController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping(path = "/{name}")
-    public CategoryDto updateCategoryById(@PathVariable String name, @RequestBody CategoryDto category) {
+    public CategoryDto updateCategoryById(@PathVariable String name, @Valid @RequestBody CategoryDtoBasic category) {
         return categoryService.updateCategoryByName(name, category);
     }
 
     // relation with food item
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping(path = "/{categoryName}/food-items")
-    public CategoryDto addFoodItemsToCategory(@PathVariable String categoryName, @RequestBody Set<String> foodNames) {
+    public WarningResponse<CategoryDto> addFoodItemsToCategory(@PathVariable String categoryName, @Valid @RequestBody StringsDto foodNames) {
         return categoryService.addFoodItemsToCategory(categoryName, foodNames);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping(path = "/{categoryName}/food-items")
-    public CategoryDto deleteFoodItemFromCategory(@PathVariable String categoryName, @RequestBody Set<String> foodNames) {
+    public WarningResponse<CategoryDto> deleteFoodItemFromCategory(@PathVariable String categoryName, @Valid @RequestBody StringsDto foodNames) {
         return categoryService.removeFoodItemsFromCategory(categoryName, foodNames);
     }
 }

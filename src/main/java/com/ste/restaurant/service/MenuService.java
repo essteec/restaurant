@@ -1,11 +1,12 @@
 package com.ste.restaurant.service;
 
-import com.ste.restaurant.dto.FoodItemDto;
-import com.ste.restaurant.dto.MenuDto;
-import com.ste.restaurant.dto.MenuDtoBasic;
+import com.ste.restaurant.dto.*;
 import com.ste.restaurant.entity.Category;
 import com.ste.restaurant.entity.FoodItem;
 import com.ste.restaurant.entity.Menu;
+import com.ste.restaurant.exception.AlreadyExistsException;
+import com.ste.restaurant.exception.NotFoundException;
+import com.ste.restaurant.exception.NullValueException;
 import com.ste.restaurant.repository.CategoryRepository;
 import com.ste.restaurant.repository.FoodItemRepository;
 import com.ste.restaurant.repository.MenuRepository;
@@ -28,11 +29,11 @@ public class MenuService {
 
     public MenuDtoBasic saveMenu(MenuDtoBasic menu) {
         if (menu.getMenuName() == null) {
-            return null;
+            throw new NullValueException("Menu", "name");
         }
 
         if (menuRepository.existsMenuByMenuName(menu.getMenuName())) {
-            return null;
+            throw new AlreadyExistsException("Menu", menu.getMenuName());
         }
         Menu menuSave = new Menu();
         BeanUtils.copyProperties(menu, menuSave);
@@ -58,14 +59,13 @@ public class MenuService {
     }
 
     public MenuDto getMenuByName(String name) {
-        Optional<Menu> menu = menuRepository.findByMenuName(name);
-        if (menu.isEmpty()) {
-            return null;
-        }
+        Menu menu = menuRepository.findByMenuName(name)
+                .orElseThrow(() -> new NotFoundException("Menu", name));
+
         MenuDto menuDto = new MenuDto();
-        BeanUtils.copyProperties(menu.get(), menuDto);
+        BeanUtils.copyProperties(menu, menuDto);
         menuDto.setFoodItems(new HashSet<>());
-        for (FoodItem foodItem : menu.get().getFoodItems()) {
+        for (FoodItem foodItem : menu.getFoodItems()) {
             FoodItemDto foodItemDto = new FoodItemDto();
             BeanUtils.copyProperties(foodItem, foodItemDto);
             menuDto.getFoodItems().add(foodItemDto);
@@ -74,11 +74,8 @@ public class MenuService {
     }
 
     public MenuDto deleteMenuByName(String name) {
-        Optional<Menu> menu = menuRepository.findByMenuName(name);
-        if (menu.isEmpty()) {
-            return null;
-        }
-        Menu menuDel = menu.get();
+        Menu menuDel = menuRepository.findByMenuName(name)
+                .orElseThrow(() -> new NotFoundException("Menu", name));
 
         MenuDto menuDto = new MenuDto();
         BeanUtils.copyProperties(menuDel, menuDto);
@@ -93,15 +90,12 @@ public class MenuService {
     }
 
     public MenuDto updateMenuByName(String name, MenuDtoBasic menu) {
-        Optional<Menu> menuOpt = menuRepository.findByMenuName(name);
-        if (menuOpt.isEmpty()) {
-            return null;
-        }
-        Menu menuOld = menuOpt.get();
+        Menu menuOld = menuRepository.findByMenuName(name)
+                .orElseThrow(() -> new NotFoundException("Menu", name));
 
         if  (menu.getMenuName() != null && !menu.getMenuName().equals(name)) {
             if (menuRepository.findByMenuName(menu.getMenuName()).isPresent()) {
-                return null;
+                throw new AlreadyExistsException("Menu", menu.getMenuName());
             }
         }
         BeanUtils.copyProperties(menu, menuOld,
@@ -120,7 +114,9 @@ public class MenuService {
         return menuResponse;
     }
 
-    public List<MenuDto> setActiveMenu(List<String> menuNames) {
+    public List<MenuDto> setActiveMenu(StringsDto menuNamesDto) {
+        Set<String> menuNames = menuNamesDto.getNames();
+
         List<Menu> avtiveMenus = menuRepository.findAllByActive(true);
         for  (Menu activeMenu : avtiveMenus) {
             activeMenu.setActive(false);
@@ -190,57 +186,61 @@ public class MenuService {
         return menuDtos;
     }
 
-    public MenuDto addFoodsToMenu(String menuName, Set<String> foodItemNames) {
-        Optional<Menu> menuOpt = menuRepository.findByMenuName(menuName);
-        if (menuOpt.isEmpty()) {
-            return null;
-        }
-        Menu menuOld = menuOpt.get();
+    public WarningResponse<MenuDto> addFoodsToMenu(String menuName, StringsDto foodItemNamesDto) {
+        Set<String> foodItemNames = foodItemNamesDto.getNames();
 
-        for (String foodItemName : foodItemNames) {
-            Optional<FoodItem> foodItemOpt = foodItemRepository.findByFoodName(foodItemName);
+        Menu menuOld = menuRepository.findByMenuName(menuName)
+                .orElseThrow(() -> new NotFoundException("Menu", menuName));
+
+        List<String> failedNames = new ArrayList<>();
+        for (String foodName : foodItemNames) {
+            Optional<FoodItem> foodItemOpt = foodItemRepository.findByFoodName(foodName);
             if (foodItemOpt.isEmpty()) {
-                continue;
+                failedNames.add(foodName);
+            } else {
+                menuOld.getFoodItems().add(foodItemOpt.get());
             }
-            menuOld.getFoodItems().add(foodItemOpt.get());
         }
         Menu savedMenu = menuRepository.save(menuOld);
 
-        MenuDto menuDto = new MenuDto();
-        BeanUtils.copyProperties(menuOld, menuDto);
-        menuDto.setFoodItems(new HashSet<>());
+        MenuDto menuResponse = new MenuDto();
+        BeanUtils.copyProperties(menuOld, menuResponse);
+        menuResponse.setFoodItems(new HashSet<>());
+
         for (FoodItem foodItem : savedMenu.getFoodItems()) {
             FoodItemDto foodItemDto = new FoodItemDto();
             BeanUtils.copyProperties(foodItem, foodItemDto);
-            menuDto.getFoodItems().add(foodItemDto);
+            menuResponse.getFoodItems().add(foodItemDto);
         }
-        return menuDto;
+        return new WarningResponse<>(menuResponse, failedNames);
     }
 
-    public MenuDto removeFoodsFromMenu(String menuName, Set<String> foodItemNames) {
-        Optional<Menu> menuOpt = menuRepository.findByMenuName(menuName);
-        if (menuOpt.isEmpty()) {
-            return null;
-        }
-        Menu menuOld = menuOpt.get();
+    public WarningResponse<MenuDto> removeFoodsFromMenu(String menuName, StringsDto foodItemNamesDto) {
+        Set<String> foodItemNames = foodItemNamesDto.getNames();
 
-        for (String foodItemName : foodItemNames) {
-            Optional<FoodItem> foodItemOpt = foodItemRepository.findByFoodName(foodItemName);
+        Menu menuOld = menuRepository.findByMenuName(menuName)
+                .orElseThrow(() -> new NotFoundException("Menu", menuName));
+
+        List<String> failedNames = new ArrayList<>();
+        for (String foodName : foodItemNames) {
+            Optional<FoodItem> foodItemOpt = foodItemRepository.findByFoodName(foodName);
             if (foodItemOpt.isEmpty()) {
-                continue;
+                failedNames.add(foodName);
+            } else {
+                menuOld.getFoodItems().remove(foodItemOpt.get());
             }
-            menuOld.getFoodItems().remove(foodItemOpt.get());
         }
+
         Menu savedMenu = menuRepository.save(menuOld);
 
-        MenuDto menuDto = new MenuDto();
-        BeanUtils.copyProperties(menuOld, menuDto);
-        menuDto.setFoodItems(new HashSet<>());
+        MenuDto menuResponse = new MenuDto();
+        BeanUtils.copyProperties(menuOld, menuResponse);
+        menuResponse.setFoodItems(new HashSet<>());
         for (FoodItem foodItem : savedMenu.getFoodItems()) {
             FoodItemDto foodItemDto = new FoodItemDto();
             BeanUtils.copyProperties(foodItem, foodItemDto);
-            menuDto.getFoodItems().add(foodItemDto);
+            menuResponse.getFoodItems().add(foodItemDto);
         }
-        return menuDto;
+        return new WarningResponse<>(menuResponse, failedNames);
     }
 }

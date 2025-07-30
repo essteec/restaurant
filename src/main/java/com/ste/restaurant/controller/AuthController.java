@@ -2,11 +2,12 @@ package com.ste.restaurant.controller;
 
 import com.ste.restaurant.dto.auth.AuthRequest;
 import com.ste.restaurant.dto.auth.AuthResponse;
-import com.ste.restaurant.dto.RegisterRequest;
+import com.ste.restaurant.dto.userdto.UserDtoIO;
 import com.ste.restaurant.entity.User;
 import com.ste.restaurant.entity.UserRole;
 import com.ste.restaurant.repository.UserRepository;
 import com.ste.restaurant.security.JwtUtil;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +39,7 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<?> login(@Valid @RequestBody AuthRequest authRequest) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword())
@@ -60,7 +61,7 @@ public class AuthController {
 
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<?> register(@Valid @RequestBody UserDtoIO request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             return  ResponseEntity.status(HttpStatus.CONFLICT).body("Email already exists! Please try login.");
         }

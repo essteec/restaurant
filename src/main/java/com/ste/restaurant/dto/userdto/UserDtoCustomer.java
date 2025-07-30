@@ -10,17 +10,15 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDto {
-    private Long id;
+public class UserDtoCustomer {
     private String firstName;
     private String lastName;
-    private UserRole role;
     private String email;
     private Date birthday;
     private Integer loyaltyPoints;
-    private BigDecimal salary;
     private List<AddressDto> addresses;
 }

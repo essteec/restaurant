@@ -1,10 +1,10 @@
 package com.ste.restaurant.service;
 
+import com.ste.restaurant.exception.NotFoundException;
 import com.ste.restaurant.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import com.ste.restaurant.entity.User;
 
@@ -14,11 +14,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
     private UserRepository userRepository;
 
-
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+                .orElseThrow(() -> new NotFoundException("User", email));
 
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getEmail())

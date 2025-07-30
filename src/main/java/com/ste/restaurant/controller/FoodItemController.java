@@ -3,6 +3,7 @@ package com.ste.restaurant.controller;
 import com.ste.restaurant.dto.CategoryDtoBasic;
 import com.ste.restaurant.dto.FoodItemDto;
 import com.ste.restaurant.service.FoodItemService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ public class FoodItemController {
     private FoodItemService foodItemService;
 
     @PostMapping
-    public FoodItemDto saveFoodItem(@RequestBody FoodItemDto foodItem) {
+    public FoodItemDto saveFoodItem(@Valid @RequestBody FoodItemDto foodItem) {
         return foodItemService.saveFoodItem(foodItem);
     }
 
@@ -37,7 +38,7 @@ public class FoodItemController {
     }
 
     @PutMapping(path = "/{name}")
-    public FoodItemDto updateFoodItemById(@PathVariable String name, @RequestBody FoodItemDto foodItem) {
+    public FoodItemDto updateFoodItemById(@PathVariable String name, @Valid @RequestBody FoodItemDto foodItem) {
         return foodItemService.updateFoodItemByName(name, foodItem);
     }
 

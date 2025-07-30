@@ -3,9 +3,11 @@ package com.ste.restaurant.controller;
 import com.ste.restaurant.dto.CallRequestDto;
 import com.ste.restaurant.dto.CallRequestDtoBasic;
 import com.ste.restaurant.service.CallRequestService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,46 +32,46 @@ public class CallRequestController {
         return callRequestService.deleteCallRequestById(id);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'CHEF', 'WAITER')")
+    // waiter or admin
+    @PreAuthorize("hasAnyRole('ADMIN', 'WAITER')")
     @GetMapping
     public List<CallRequestDto> getAllCallRequests(
             @RequestParam(required = false) String type,
             @RequestParam(required = false) Boolean active,
             Authentication auth) {
-        if (type != null &&  active != null) {
+        if (auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_WAITER")))
+            return callRequestService.getAllCallRequestsBy(true);
+        if (type != null &&  active != null)
             return callRequestService.getAllCallRequestsBy(type, active);
-        }  else if (type != null) {
+        if (type != null)
             return callRequestService.getAllCallRequestsBy(type);
-        } else if (active != null) {
+        if (active != null)
             return callRequestService.getAllCallRequestsBy(active);
-        } else  {
-            return callRequestService.getAllCallRequests();
-        }
+        return callRequestService.getAllCallRequests();
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'WAITER')")
+    @PatchMapping(path = "/{id}/resolve")
+    public CallRequestDto resolveCallRequest(@PathVariable Long id) {
+        return  callRequestService.resolveCallRequestById(id);
     }
 
     // Customer
-    @PreAuthorize("hasAnyRole('CUSTOMER', 'VIP_CUSTOMER')")
+    @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping(path = "/my/latest")
     public List<CallRequestDto> getLatestCallRequests(Authentication auth) {
         return callRequestService.getLatestCallRequests(auth.getName());
     }
 
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping
-    public CallRequestDto createCallRequest(@RequestBody CallRequestDtoBasic callRequestDto, Authentication auth) {
+    public CallRequestDto createCallRequest(@Valid @RequestBody CallRequestDtoBasic callRequestDto, Authentication auth) {
         return callRequestService.createCallRequest(callRequestDto, auth.getName());
     }
 
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('CUSTOMER')")
     @PatchMapping(path = "/{id}")
-    public CallRequestDto disableCallRequestByCustomer(@PathVariable Long id, Authentication auth) {
-        return callRequestService.disableCallRequestById(id, auth.getName());
-    }
-
-    // waiter or admin
-    @PreAuthorize("hasAnyRole('ADMIN', 'WAITER')")
-    @PatchMapping(path = "/{id}/admin")
-    public CallRequestDto disableCallRequestByAdmin(@PathVariable Long id) {
-        return  callRequestService.disableCallRequestById(id);
+    public CallRequestDto resolveCallRequestByCustomer(@PathVariable Long id, Authentication auth) {
+        return callRequestService.resolveCallRequestById(id, auth.getName());
     }
 }

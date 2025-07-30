@@ -2,8 +2,6 @@ package com.ste.restaurant.dto;
 
 import com.ste.restaurant.dto.userdto.UserDto;
 import com.ste.restaurant.entity.RequestType;
-import com.ste.restaurant.entity.TableTop;
-import com.ste.restaurant.entity.User;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,7 +20,7 @@ public class CallRequestDto {
 
     private String message;
 
-    private TableTop table;
+    private TableTopDto table;
 
     @ManyToOne
     private UserDto customer;

@@ -20,8 +20,9 @@ public interface OrderRepository extends JpaRepository<Order,Long> {
 
     List<Order> findByCustomer(User customer);
 
-    Order findByCustomerAndAddressAndStatusAndOrderTimeAfterAndOrderTimeBefore(User customer, Address address, OrderStatus status, LocalDateTime orderTimeAfter, LocalDateTime orderTimeBefore);
-
-
     Order findTopByCustomerAndStatusNotAndStatusNotOrderByOrderTimeDesc(User customer, OrderStatus status, OrderStatus status1);
+
+    List<Order> findAllByStatus(OrderStatus status);
+
+    List<Order> findAllByCustomerAndAddressAndStatusAndOrderTimeBetween(User customer, Address address, OrderStatus status, LocalDateTime orderTimeAfter, LocalDateTime orderTimeBefore);
 }

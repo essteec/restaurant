@@ -3,14 +3,14 @@ package com.ste.restaurant.service;
 import com.ste.restaurant.dto.CallRequestDto;
 import com.ste.restaurant.dto.CallRequestDtoBasic;
 import com.ste.restaurant.entity.*;
+import com.ste.restaurant.exception.InvalidValueException;
+import com.ste.restaurant.exception.NotFoundException;
 import com.ste.restaurant.mapper.OrderMapper;
 import com.ste.restaurant.repository.CallRequestRepository;
 import com.ste.restaurant.repository.OrderRepository;
 import com.ste.restaurant.repository.UserRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -30,19 +30,15 @@ public class CallRequestService {
     private OrderMapper orderMapper;
 
     public CallRequestDto getCallRequestById(Long id) {
-        Optional<CallRequest> callRequest = callRequestRepository.findById(id);
-        if (callRequest.isEmpty()) {
-            return null;
-        }
-        return orderMapper.callRequestToCallRequestDto(callRequest.get());
+        CallRequest callRequest = callRequestRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("CallRequest", id));
+        return orderMapper.callRequestToCallRequestDto(callRequest);
     }
 
     public CallRequestDto deleteCallRequestById(Long id) {
-        Optional<CallRequest> callRequestOpt = callRequestRepository.findById(id);
-        if (callRequestOpt.isEmpty()) {
-            return null;
-        }
-        CallRequest callRequest = callRequestOpt.get();
+        CallRequest callRequest = callRequestRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("CallRequest", id));
+
         callRequestRepository.delete(callRequest);
         return orderMapper.callRequestToCallRequestDto(callRequest);
     }
@@ -63,7 +59,7 @@ public class CallRequestService {
         try {
             requestType = RequestType.valueOf(type.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid type " + type);
+            throw new InvalidValueException("CallRequest", "type", type);
         }
 
         List<CallRequest> calls = callRequestRepository.findAllByType(requestType);
@@ -92,7 +88,7 @@ public class CallRequestService {
         try {
             requestType = RequestType.valueOf(type.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid type " + type);
+            throw new InvalidValueException("CallRequest", "type", type);
         }
 
         List<CallRequest> calls = callRequestRepository.findAllByTypeAndActive(requestType, active);
@@ -108,7 +104,7 @@ public class CallRequestService {
 
     public List<CallRequestDto> getLatestCallRequests(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User", email));
 
         LocalDateTime since = LocalDateTime.now().minusHours(4);
         List<CallRequest> calls = callRequestRepository.findByCustomerAndCreatedAtAfter(user, since);
@@ -124,7 +120,7 @@ public class CallRequestService {
 
     public CallRequestDto createCallRequest(CallRequestDtoBasic callRequestDtoBasic, String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User", email));
 
         CallRequest callRequest = new CallRequest();
         BeanUtils.copyProperties(callRequestDtoBasic, callRequest);
@@ -134,7 +130,7 @@ public class CallRequestService {
         // To set the table in CallRequest, get the user's last order with status not COMPLETED and use its table.
         Order lastActiveOrder = orderRepository.findTopByCustomerAndStatusNotAndStatusNotOrderByOrderTimeDesc(user, OrderStatus.COMPLETED, OrderStatus.CANCELLED);
         if (lastActiveOrder == null || lastActiveOrder.getTable() == null) {
-            throw new IllegalStateException("No active order with a table found for user");
+            throw new NotFoundException("ActiveOrder");
         }
         callRequest.setTable(lastActiveOrder.getTable());
         
@@ -144,27 +140,23 @@ public class CallRequestService {
         return response;
     }
 
-    public CallRequestDto disableCallRequestById(Long id) {
-        Optional<CallRequest> callRequestOpt = callRequestRepository.findById(id);
-        if (callRequestOpt.isEmpty()) {
-            return null;
-        }
-        CallRequest callRequest = callRequestOpt.get();
-        callRequest.setActive(false);
+    // employee
+    public CallRequestDto resolveCallRequestById(Long id) {
+        CallRequest callRequest = callRequestRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("CallRequest", id));
 
+        callRequest.setActive(false);
         callRequestRepository.save(callRequest);
         return orderMapper.callRequestToCallRequestDto(callRequest);
     }
 
-    public CallRequestDto disableCallRequestById(Long id, String email) {
-        Optional<CallRequest> callRequestOpt = callRequestRepository.findById(id);
-        if (callRequestOpt.isEmpty()) {
-            return null;
-        }
-        CallRequest callRequest = callRequestOpt.get();
+    // customer
+    public CallRequestDto resolveCallRequestById(Long id, String email) {
+        CallRequest callRequest = callRequestRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("CallRequest", id));
 
         if (!callRequest.getCustomer().getEmail().equals(email)) {
-            throw new AccessDeniedException("Not allowed to disable this call request");
+            throw new NotFoundException("CallRequest", id);
         }
 
         callRequest.setActive(false);

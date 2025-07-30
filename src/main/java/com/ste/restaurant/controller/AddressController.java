@@ -2,6 +2,7 @@ package com.ste.restaurant.controller;
 
 import com.ste.restaurant.dto.AddressDto;
 import com.ste.restaurant.service.AddressService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@PreAuthorize("hasAnyRole('CUSTOMER', 'VIP_CUSTOMER')")
+@PreAuthorize("hasRole('CUSTOMER')")
 @RequestMapping("/rest/api/addresses")
 @RestController
 public class AddressController {
@@ -19,7 +20,7 @@ public class AddressController {
 
     // customer
     @PostMapping
-    public AddressDto saveAddress(@RequestBody AddressDto addressDto, Authentication auth) {
+    public AddressDto saveAddress(@Valid @RequestBody AddressDto addressDto, Authentication auth) {
         return addressService.saveAddress(addressDto, auth.getName());
     }
 
@@ -34,7 +35,7 @@ public class AddressController {
     }
 
     @PutMapping(path = "/{id}")
-    public AddressDto updateAddress(@RequestBody AddressDto addressDto, @PathVariable Long id, Authentication auth) {
+    public AddressDto updateAddress(@Valid @RequestBody AddressDto addressDto, @PathVariable Long id, Authentication auth) {
         addressDto.setAddressId(id);
         return addressService.updateAddressByEmail(addressDto, auth.getName());
     }

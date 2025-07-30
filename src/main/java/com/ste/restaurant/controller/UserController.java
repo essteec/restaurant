@@ -1,15 +1,19 @@
 package com.ste.restaurant.controller;
 
 import com.ste.restaurant.dto.AddressDto;
+import com.ste.restaurant.dto.BigDecimalDto;
+import com.ste.restaurant.dto.StringDto;
 import com.ste.restaurant.dto.userdto.UserDto;
+import com.ste.restaurant.dto.userdto.UserDtoCustomer;
+import com.ste.restaurant.dto.userdto.UserDtoEmployee;
 import com.ste.restaurant.dto.userdto.UserDtoIO;
 import com.ste.restaurant.service.AddressService;
 import com.ste.restaurant.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RequestMapping("rest/api/users/")
@@ -24,7 +28,7 @@ public class UserController {
 
     // Admin
     @PostMapping
-    public UserDto saveUser(@RequestBody UserDtoIO userDto) {
+    public UserDto saveUser(@Valid @RequestBody UserDtoIO userDto) {
         return userService.saveUser(userDto);
     }
 
@@ -47,13 +51,18 @@ public class UserController {
     }
 
     @PutMapping(path = "/{id}")
-    public UserDto updateUserById(@PathVariable Long id, @RequestBody UserDtoIO userDto) {
+    public UserDto updateUserById(@PathVariable Long id, @Valid @RequestBody UserDtoIO userDto) {
         return userService.updateUserById(id, userDto);
     }
 
     @PatchMapping(path = "/{id}/role")
-    public UserDto updateUserRoleById(@PathVariable Long id, @RequestBody String userRole) {
-        return userService.updateUserRoleById(id, userRole);
+    public UserDto updateUserRoleById(@PathVariable Long id, @Valid @RequestBody StringDto role) {
+        return userService.updateUserRoleById(id, role);
+    }
+
+    @PatchMapping(path = "/{id}/salary")
+    public UserDto updateEmployeeSalaryById(@PathVariable Long id, @Valid @RequestBody BigDecimalDto salary) {
+        return userService.updateEmployeeSalaryById(id, salary);
     }
 
     // admin address
@@ -70,21 +79,27 @@ public class UserController {
     }
 
     // PROFILE
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping(path = "/profile")
-    public UserDto getProfile(Authentication auth) {
-        return userService.getUserByEmail(auth.getName());
+    public UserDtoCustomer getCustomerProfile(Authentication auth) {
+        return userService.getCustomerByEmail(auth.getName());
     }
 
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('CUSTOMER')")
     @DeleteMapping(path = "/profile")
-    public UserDto deleteProfile(Authentication auth) {
-        return userService.deleteUserByEmail(auth.getName());
+    public UserDtoCustomer deleteCustomerProfile(Authentication auth) {
+        return userService.deleteCustomerByEmail(auth.getName());
     }
 
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('CUSTOMER')")
     @PutMapping(path = "/profile")
-    public UserDto updateProfile(@RequestBody UserDtoIO userDto, Authentication auth) {
-        return userService.updateUserByEmail(auth.getName(), userDto);
+    public UserDtoCustomer updateCustomerProfile(@Valid @RequestBody UserDtoIO userDto, Authentication auth) {
+        return userService.updateCustomerByEmail(auth.getName(), userDto);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'WAITER', 'CHEF')")
+    @GetMapping(path = "/employee/profile")
+    public UserDtoEmployee getEmployeeProfile(Authentication auth) {
+        return userService.getEmployeeByEmail(auth.getName());
     }
 }

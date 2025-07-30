@@ -18,7 +18,7 @@ public class FoodItem {
     @Column(name = "food_id")
     private Long foodId;
 
-    @Column(name = "food_name")
+    @Column(name = "food_name", nullable = false, unique = true)
     private String foodName;
 
     private String image;

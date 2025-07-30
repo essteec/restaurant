@@ -197,8 +197,13 @@ public class DataSeeder implements CommandLineRunner {
             List<TableTop> tables = new ArrayList<>();
             for (Map<String, Object> raw : tablesRaw) {
                 TableTop t = new TableTop();
-                t.setTableNumber((String) raw.get("number"));
-                t.setTableStatus(TableStatus.valueOf((String) raw.get("status")));
+                t.setTableNumber((String) raw.get("tableNumber"));
+
+                t.setCapacity((Integer) raw.get("capacity"));
+
+                Object statusRaw = raw.get("tableStatus");
+                t.setTableStatus(statusRaw != null ? TableStatus.valueOf((String) statusRaw) : TableStatus.AVAILABLE); // or whatever your default is
+
                 tables.add(t);
             }
             tableTopRepository.saveAll(tables);

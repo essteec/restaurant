@@ -4,12 +4,12 @@ package com.ste.restaurant.service;
 import com.ste.restaurant.dto.AddressDto;
 import com.ste.restaurant.entity.Address;
 import com.ste.restaurant.entity.User;
+import com.ste.restaurant.exception.NotFoundException;
+import com.ste.restaurant.exception.NullValueException;
 import com.ste.restaurant.repository.AddressRepository;
 import com.ste.restaurant.repository.UserRepository;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,20 +28,20 @@ public class AddressService {
     // admin
     public List<AddressDto> getAddressesOfUser(Long userId){
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UsernameNotFoundException("No user!"));
+                .orElseThrow(() -> new NotFoundException("User", userId));
 
         return getAddresses(user.getEmail());
     }
 
     public AddressDto deleteAddressById(Long userId, Long addressId){
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User", userId));
 
         Address address = addressRepository.findById(addressId)
-                .orElseThrow(() -> new RuntimeException("Address not found"));
+                .orElseThrow(() -> new NotFoundException("Address", addressId));
 
         if (!user.getAddresses().contains(address)) {
-            throw new RuntimeException("Address not belong to this user");
+            throw new NotFoundException("Address", addressId);  // this address not belong to them
         }
 
         user.getAddresses().remove(address);
@@ -57,7 +57,7 @@ public class AddressService {
     @Transactional
     public AddressDto saveAddress(AddressDto addressDto, String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User", email));
         Address address = new Address();
         BeanUtils.copyProperties(addressDto, address);
 
@@ -73,7 +73,7 @@ public class AddressService {
 
     public List<AddressDto> getAddresses(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User", email));
 
         List<AddressDto> addressDtos = new ArrayList<>();
         List<Address> addresses = user.getAddresses();
@@ -88,13 +88,13 @@ public class AddressService {
     @Transactional
     public AddressDto deleteAddressById(Long id, String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User", email));
 
         Address address = addressRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Address not found"));
+                .orElseThrow(() -> new NotFoundException("Address", id));
 
         if (!user.getAddresses().contains(address)) {
-            throw new RuntimeException("Address not found");
+            throw new NotFoundException("Address", id);  // this address not belong to them
         }
 
         user.getAddresses().remove(address);
@@ -108,18 +108,19 @@ public class AddressService {
 
     @Transactional
     public AddressDto updateAddressByEmail(AddressDto addressDto, String email) {
-        if (addressDto.getAddressId() == null) {
-            throw new RuntimeException("Address id is null");
+        Long addressId = addressDto.getAddressId();
+        if (addressId == null) {
+            throw new NullValueException("Address", "id");
         }
 
-        User  user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User", email));
 
-        Address address = addressRepository.findById(addressDto.getAddressId())
-                .orElseThrow(() -> new RuntimeException("Address not found"));
+        Address address = addressRepository.findById(addressId)
+                .orElseThrow(() -> new NotFoundException("Address", addressId));
 
         if (!user.getAddresses().contains(address)) {
-            throw new RuntimeException("Address not found");
+            throw new NotFoundException("Address", addressId);  // this address not belong to them
         }
 
         BeanUtils.copyProperties(addressDto, address,

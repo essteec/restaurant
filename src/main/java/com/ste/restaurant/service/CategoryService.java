@@ -1,10 +1,11 @@
 package com.ste.restaurant.service;
 
-import com.ste.restaurant.dto.CategoryDto;
-import com.ste.restaurant.dto.CategoryDtoBasic;
-import com.ste.restaurant.dto.FoodItemDto;
+import com.ste.restaurant.dto.*;
 import com.ste.restaurant.entity.Category;
 import com.ste.restaurant.entity.FoodItem;
+import com.ste.restaurant.exception.AlreadyExistsException;
+import com.ste.restaurant.exception.NotFoundException;
+import com.ste.restaurant.exception.NullValueException;
 import com.ste.restaurant.repository.CategoryRepository;
 import com.ste.restaurant.repository.FoodItemRepository;
 import org.springframework.beans.BeanUtils;
@@ -24,10 +25,10 @@ public class CategoryService {
 
     public CategoryDtoBasic saveCategory(CategoryDtoBasic category) {
         if (category.getCategoryName() == null) {
-            return null;
+            throw new NullValueException("Category", "name");
         }
         if (categoryRepository.existsCategoryByCategoryName(category.getCategoryName())) {
-            return null;  // already have same name
+            throw new AlreadyExistsException("Category", category.getCategoryName());
         }
 
         Category categorySave = new Category();
@@ -56,11 +57,8 @@ public class CategoryService {
     }
 
     public CategoryDto deleteCategoryByName(String name) {
-        Optional<Category> categoryOpt = categoryRepository.findByCategoryName(name);
-        if (categoryOpt.isEmpty()) {
-            return null;  // exception
-        }
-        Category category = categoryOpt.get();
+        Category category = categoryRepository.findByCategoryName(name)
+                .orElseThrow(() -> new NotFoundException("Category", name));
 
         CategoryDto categoryDto = new CategoryDto();
         BeanUtils.copyProperties(category, categoryDto);
@@ -74,16 +72,13 @@ public class CategoryService {
         return categoryDto;
     }
 
-    public CategoryDto updateCategoryByName(String name, CategoryDto category) {
-        Optional<Category> categoryOpt = categoryRepository.findByCategoryName(name);
-        if (categoryOpt.isEmpty()) {
-            return null;
-        }
-        Category categoryOld = categoryOpt.get();
+    public CategoryDto updateCategoryByName(String name, CategoryDtoBasic category) {
+        Category categoryOld = categoryRepository.findByCategoryName(name)
+                .orElseThrow(() -> new NotFoundException("Category", name));
 
         if (category.getCategoryName() != null && !category.getCategoryName().equals(name)) {
             if (categoryRepository.findByCategoryName(category.getCategoryName()).isPresent()) {
-                return null;
+                throw new AlreadyExistsException("Category", category.getCategoryName());
             }
         }
         BeanUtils.copyProperties(category, categoryOld,
@@ -106,65 +101,61 @@ public class CategoryService {
     }
 
     // relation with food item
-    public CategoryDto addFoodItemsToCategory(String categoryName, Set<String> foodNames) {
-        Optional<Category> categoryOpt = categoryRepository.findByCategoryName(categoryName);
-        if (categoryOpt.isEmpty()) {
-            return null;
-        }
-        Category category = categoryOpt.get();
+    public WarningResponse<CategoryDto> addFoodItemsToCategory(String categoryName, StringsDto foodNamesDto) {
+        Set<String> foodNames = foodNamesDto.getNames();
 
-        Set<FoodItem> foodItems = new HashSet<>();
+        Category category = categoryRepository.findByCategoryName(categoryName)
+                .orElseThrow(() -> new NotFoundException("Category", categoryName));
+
+        List<String> failedNames =  new ArrayList<>();
         for (String foodName : foodNames) {
             Optional<FoodItem> foodItem = foodItemRepository.findByFoodName(foodName);
             if (foodItem.isEmpty()) {
-                continue;
+                failedNames.add(foodName);
+            } else {
+                category.getFoodItems().add(foodItem.get());
             }
-            foodItems.add(foodItem.get());
         }
-        category.getFoodItems().addAll(foodItems);
         Category savedCategory = categoryRepository.save(category);
 
         CategoryDto categoryResponse = new CategoryDto();
         BeanUtils.copyProperties(savedCategory, categoryResponse);
         categoryResponse.setFoods(new HashSet<>());
-        if (savedCategory.getFoodItems() != null) {
-            for (FoodItem food : savedCategory.getFoodItems()) {
-                FoodItemDto foodItemDto = new FoodItemDto();
-                BeanUtils.copyProperties(food, foodItemDto);
-                categoryResponse.getFoods().add(foodItemDto);
-            }
+
+        for (FoodItem food : savedCategory.getFoodItems()) {
+            FoodItemDto foodItemDto = new FoodItemDto();
+            BeanUtils.copyProperties(food, foodItemDto);
+            categoryResponse.getFoods().add(foodItemDto);
         }
-        return categoryResponse;
+        return new WarningResponse<>(categoryResponse, failedNames);
     }
 
-    public CategoryDto removeFoodItemsFromCategory(String categoryName, Set<String> foodNames) {
-        Optional<Category> categoryOpt = categoryRepository.findByCategoryName(categoryName);
-        if (categoryOpt.isEmpty()) {
-            return null;
-        }
-        Category category = categoryOpt.get();
+    public WarningResponse<CategoryDto> removeFoodItemsFromCategory(String categoryName, StringsDto foodNamesDto) {
+        Set<String> foodNames = foodNamesDto.getNames();
 
-        Set<FoodItem> foodItems = new HashSet<>();
+        Category category = categoryRepository.findByCategoryName(categoryName)
+                .orElseThrow(() -> new NotFoundException("Category", categoryName));
+
+        List<String> failedNames = new  ArrayList<>();
         for (String foodName : foodNames) {
             Optional<FoodItem> foodItem = foodItemRepository.findByFoodName(foodName);
             if (foodItem.isEmpty()) {
-                continue;
+                failedNames.add(foodName);
+            } else {
+                category.getFoodItems().remove(foodItem.get());
             }
-            foodItems.add(foodItem.get());
         }
-        category.getFoodItems().removeAll(foodItems);
+
         Category savedCategory = categoryRepository.save(category);
 
         CategoryDto categoryResponse = new CategoryDto();
         BeanUtils.copyProperties(savedCategory, categoryResponse);
         categoryResponse.setFoods(new HashSet<>());
-        if (savedCategory.getFoodItems() != null) {
-            for (FoodItem food : savedCategory.getFoodItems()) {
-                FoodItemDto foodItemDto = new FoodItemDto();
-                BeanUtils.copyProperties(food, foodItemDto);
-                categoryResponse.getFoods().add(foodItemDto);
-            }
+        for (FoodItem food : savedCategory.getFoodItems()) {
+            FoodItemDto foodItemDto = new FoodItemDto();
+            BeanUtils.copyProperties(food, foodItemDto);
+            categoryResponse.getFoods().add(foodItemDto);
         }
-        return categoryResponse;
+        return new WarningResponse<>(categoryResponse, failedNames);
     }
 }

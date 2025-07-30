@@ -4,6 +4,10 @@ import com.ste.restaurant.dto.CategoryDtoBasic;
 import com.ste.restaurant.dto.FoodItemDto;
 import com.ste.restaurant.entity.Category;
 import com.ste.restaurant.entity.FoodItem;
+import com.ste.restaurant.exception.AlreadyExistsException;
+import com.ste.restaurant.exception.ImageProcessingException;
+import com.ste.restaurant.exception.NotFoundException;
+import com.ste.restaurant.exception.NullValueException;
 import com.ste.restaurant.repository.CategoryRepository;
 import com.ste.restaurant.repository.FoodItemRepository;
 import org.springframework.beans.BeanUtils;
@@ -26,10 +30,10 @@ public class FoodItemService {
 
     public FoodItemDto saveFoodItem(FoodItemDto foodItem) {
         if (foodItem.getFoodName() == null) {
-            return null;
+            throw new NullValueException("Food", "name");
         }
         if (foodItemRepository.existsFoodItemByFoodName(foodItem.getFoodName())) {
-            return null;
+            throw new AlreadyExistsException("Food", foodItem.getFoodName());
         }
         FoodItem foodItemSave = new FoodItem();
         BeanUtils.copyProperties(foodItem, foodItemSave);
@@ -49,36 +53,30 @@ public class FoodItemService {
     }
 
     public FoodItemDto getFoodItemByName(String name) {
-        Optional<FoodItem> foodItem = foodItemRepository.findByFoodName(name);
-        if (foodItem.isEmpty()) {
-            return null;  // exception
-        }
+        FoodItem foodItem = foodItemRepository.findByFoodName(name)
+                .orElseThrow(() -> new NotFoundException("Food", name));
+
         FoodItemDto foodItemDto = new FoodItemDto();
-        BeanUtils.copyProperties(foodItem.get(), foodItemDto);
+        BeanUtils.copyProperties(foodItem, foodItemDto);
         return foodItemDto;
     }
 
     public FoodItemDto deleteFoodItemByName(String name) {
-        Optional<FoodItem> foodItem = foodItemRepository.findByFoodName(name);
-        if (foodItem.isEmpty()) {
-            return null;
-        }
-        FoodItem food = foodItem.get();
+        FoodItem food = foodItemRepository.findByFoodName(name)
+                        .orElseThrow(() -> new NotFoundException("Food", name));
         foodItemRepository.delete(food);
         FoodItemDto foodItemDto = new FoodItemDto();
-        BeanUtils.copyProperties(foodItem.get(), foodItemDto);
+        BeanUtils.copyProperties(food, foodItemDto);
         return foodItemDto;
     }
 
     public FoodItemDto updateFoodItemByName(String name, FoodItemDto foodItem) {
-        Optional<FoodItem> foodItemOpt = foodItemRepository.findByFoodName(name);
-        if (foodItemOpt.isEmpty()) {
-            return null;
-        }
-        FoodItem foodItemOld = foodItemOpt.get();
+        FoodItem foodItemOld = foodItemRepository.findByFoodName(name)
+                .orElseThrow(() -> new NotFoundException("Food", name));
+
         if (foodItem.getFoodName() != null && !foodItem.getFoodName().equals(name)) {
             if (foodItemRepository.findByFoodName(foodItem.getFoodName()).isPresent()) {
-                return null;  // exception
+                throw new AlreadyExistsException("Food", foodItem.getFoodName());
             }
         }
         BeanUtils.copyProperties(foodItem, foodItemOld,
@@ -111,7 +109,7 @@ public class FoodItemService {
     // process image
     public FoodItemDto addImageToFood(String name, MultipartFile imageFile) {
         FoodItem food = foodItemRepository.findByFoodName(name)
-                .orElseThrow(() -> new RuntimeException("Food not found"));
+                .orElseThrow(() -> new NotFoundException("Food", name));
         String oldImage = food.getImage();
 
         try {
@@ -125,7 +123,7 @@ public class FoodItemService {
             String filePath = dir + fileName;
 
             if (!ServiceUtil.cropAndResizeToSquare(imageFile, filePath, 600)){
-                throw new  RuntimeException("Image processing failed");
+                throw new ImageProcessingException("Image crop and resizing failed");
             }
 
             // delete old image
@@ -144,13 +142,13 @@ public class FoodItemService {
             return foodDto;
 
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new ImageProcessingException(e.getMessage());
         }
     }
 
     public boolean deleteImageFile(String name) {
         FoodItem food = foodItemRepository.findByFoodName(name)
-                .orElseThrow(() -> new RuntimeException("Food not found"));
+                .orElseThrow(() -> new NotFoundException("Food", name));
 
         return deleteImageFile(food);
     }

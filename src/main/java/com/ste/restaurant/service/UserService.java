@@ -1,8 +1,13 @@
 package com.ste.restaurant.service;
 
+import com.ste.restaurant.dto.BigDecimalDto;
+import com.ste.restaurant.dto.StringDto;
 import com.ste.restaurant.dto.userdto.UserDto;
+import com.ste.restaurant.dto.userdto.UserDtoCustomer;
+import com.ste.restaurant.dto.userdto.UserDtoEmployee;
 import com.ste.restaurant.dto.userdto.UserDtoIO;
 import com.ste.restaurant.entity.*;
+import com.ste.restaurant.exception.*;
 import com.ste.restaurant.mapper.OrderMapper;
 import com.ste.restaurant.repository.AddressRepository;
 import com.ste.restaurant.repository.OrderItemRepository;
@@ -13,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -39,8 +45,8 @@ public class UserService {
 
     public UserDto saveUser(UserDtoIO userDtoIO) {
         Optional<User> existUser = userRepository.findByEmail(userDtoIO.getEmail());
-        if (!existUser.isEmpty()) {
-            return null;  // exception
+        if (existUser.isPresent()) {
+            throw new AlreadyExistsException("User", userDtoIO.getEmail());
         }
         UserDto userDtoResponse = new UserDto();
         User user = new User();
@@ -72,7 +78,7 @@ public class UserService {
             userRole = UserRole.valueOf(role.toUpperCase());
         }
         catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid user role: " + role);
+            throw new InvalidValueException("User", "role", role);
         }
 
         List<User> users = userRepository.findAllByRole(userRole);
@@ -87,35 +93,26 @@ public class UserService {
     }
 
     public UserDto getUserById(Long id) {
-        Optional<User> user = userRepository.findById(id);
-        if (user.isEmpty()) {
-            return null;  // exception handle
-        }
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User", id));
         UserDto userDtoResponse = new UserDto();
-        BeanUtils.copyProperties(user.get(), userDtoResponse);
+        BeanUtils.copyProperties(user, userDtoResponse);
         return userDtoResponse;
     }
 
     public UserDto deleteUserById(Long id) {
-        Optional<User> user = userRepository.findById(id);
-        if (user.isEmpty()) {
-            throw new RuntimeException("User not found");
-        }
-        User userDel = user.get();
+        User userDel = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User", id));
 
         List<Order> orders = orderRepository.findByCustomer(userDel);
         for (Order order : orders) {
             List<OrderItem> orderItems = new ArrayList<>(order.getOrderItems());
-            for (OrderItem orderItem : orderItems) {
-                orderItemRepository.delete(orderItem);
-            }
+            orderItemRepository.deleteAll(orderItems);
             orderRepository.delete(order);
         }
 
         List<Address> addresses = new ArrayList<>(userDel.getAddresses());
-        for (Address address : addresses) {
-            addressRepository.delete(address);
-        }
+        addressRepository.deleteAll(addresses);
 
         userRepository.delete(userDel);
         
@@ -126,15 +123,12 @@ public class UserService {
 
     public UserDto updateUserById(Long id, UserDtoIO userDtoIO) {
         userDtoIO.setPassword(null);
-        Optional<User> userOpt = userRepository.findById(id);
-        if (userOpt.isEmpty()) {
-            return null;  // exception
-        }
-        User user = userOpt.get();
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User", id));
 
         if (userDtoIO.getEmail() != null) {
             if (userRepository.findByEmail(userDtoIO.getEmail()).isPresent()) {
-                return null;  // exception
+                throw new AlreadyExistsException("User", userDtoIO.getEmail());
             }
         }
         BeanUtils.copyProperties(userDtoIO, user,
@@ -147,77 +141,84 @@ public class UserService {
         return userDtoResponse;
     }
 
-    public UserDto updateUserRoleById(Long id, String role) {
-        if (role == null) {
-            throw new IllegalArgumentException("Role must not be null");
+    public UserDto updateUserRoleById(Long id, StringDto roleDto) {
+        if (roleDto.getName() == null) {
+            throw new NullValueException("User", "email");
         }
+        String role = roleDto.getName();
 
-        Optional<User> userOpt = userRepository.findById(id);
-
-        if (userOpt.isEmpty()) {
-            return null;  // exception
-        }
-        User user = userOpt.get();
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User", id));
 
         UserRole newRole;
         try {
             newRole = UserRole.valueOf(role.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid role: " + role);
+            throw new InvalidValueException("User", "role", role);
         }
 
-        if (user.getRole() != null && user.getRole().equals(newRole)) {
-            return null;  // exception
+        if (user.getRole().equals(newRole)) {
+            throw new AlreadyHasException("User", "role", role);
         }
-        //  if (user.getRole().equals("admin")) {} TODO
         user.setRole(newRole);
         userRepository.save(user);
-        UserDto userDtoResponse = new UserDto();
-        BeanUtils.copyProperties(user, userDtoResponse);
+        return orderMapper.userToUserDto(user);
+    }
+
+    public UserDtoCustomer getCustomerByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User", email));
+        return orderMapper.userToUserDtoCustomer(user);
+    }
+
+    public UserDtoCustomer deleteCustomerByEmail(String email) {
+        User userDel = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User", email));
+
+        UserDtoCustomer userDtoResponse = orderMapper.userToUserDtoCustomer(userDel);
+        deleteUserById(userDel.getUserId());
         return userDtoResponse;
     }
 
-    public UserDto getUserByEmail(String email) {
-        Optional<User> user = userRepository.findByEmail(email);
-        if (user.isEmpty()) {
-            return null;  // exception
-        }
-        UserDto userDtoResponse = orderMapper.userToUserDto(user.get());
-        userDtoResponse.setAddressList(user.get().getAddresses());
-        return userDtoResponse;
-    }
+    public UserDtoCustomer updateCustomerByEmail(String email, UserDtoIO userDto) {
+        userDto.setPassword(null);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User", email));
 
-    public UserDto deleteUserByEmail(String email) {
-        Optional<User> userOpt = userRepository.findByEmail(email);
-        if (userOpt.isEmpty()) {
-            throw new RuntimeException("User not found");
-        }
-        User userDel = userOpt.get();
-
-        return deleteUserById(userDel.getUserId());
-    }
-
-    public UserDto updateUserByEmail(String email, UserDtoIO userDtoIO) {
-        userDtoIO.setPassword(null);
-        Optional<User> userOpt = userRepository.findByEmail(email);
-        if (userOpt.isEmpty()) {
-            return null;
-        }
-        User user = userOpt.get();
-
-        if (userDtoIO.getEmail() != null) {
-            if (userRepository.findByEmail(userDtoIO.getEmail()).isPresent()) {
-                return null;
+        if (userDto.getEmail() != null) {
+            if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
+                throw new AlreadyExistsException("User", userDto.getEmail());
             }
         }
-        BeanUtils.copyProperties(userDtoIO, user,
-                ServiceUtil.getNullPropertyNames(userDtoIO));
+        BeanUtils.copyProperties(userDto, user,
+                ServiceUtil.getNullPropertyNames(userDto));
 
         User savedUser = userRepository.save(user);
 
-        UserDto userDtoResponse = new UserDto();
-        BeanUtils.copyProperties(savedUser, userDtoResponse);
-        return userDtoResponse;
+        return orderMapper.userToUserDtoCustomer(savedUser);
     }
 
+    public UserDto updateEmployeeSalaryById(Long id, BigDecimalDto salaryDto) {
+        if (salaryDto.getDecimal() == null) {
+            throw new NullValueException("Employee", "salary");
+        }
+        BigDecimal salary = salaryDto.getDecimal();
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User", id));
+
+        if (!(user.getRole().equals(UserRole.CHEF) || user.getRole().equals(UserRole.WAITER))) {
+            throw new InvalidOperationException("User", "Customers or Admins cannot have salary");
+        }
+        user.setSalary(salary);
+        userRepository.save(user);
+        return orderMapper.userToUserDto(user);
+    }
+
+    public UserDtoEmployee getEmployeeByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User", email));
+        
+        return orderMapper.userToUserDtoEmployee(user);
+    }
 }

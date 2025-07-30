@@ -28,7 +28,7 @@ public class User {
     @Column(name = "role")
     private UserRole role = UserRole.CUSTOMER;
 
-    @Column(name = "email")
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     @Column(name = "password")

@@ -1,7 +1,7 @@
 [
-  { "number": "7A", "status": "AVAILABLE" },
-  { "number": "8A", "status": "OCCUPIED" },
-  { "number": "7B", "status": "DIRTY" },
-  { "number": "8B", "status": "AVAILABLE" },
-  { "number": "9A", "status": "OCCUPIED" }
+  { "tableNumber": "7A", "capacity": 4},
+  { "tableNumber": "8A", "tableStatus": "OCCUPIED", "capacity": 4 },
+  { "tableNumber": "7B", "tableStatus": "DIRTY", "capacity": 4},
+  { "tableNumber": "8B", "capacity": 4},
+  { "tableNumber": "9A", "tableStatus": "OCCUPIED","capacity": 4 }
 ]

@@ -1,7 +1,9 @@
 package com.ste.restaurant.controller;
 
+import com.ste.restaurant.dto.StringDto;
 import com.ste.restaurant.dto.TableTopDto;
 import com.ste.restaurant.service.TableTopService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -18,14 +20,8 @@ public class TableTopController {
     // by admin
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public TableTopDto saveTable(@RequestBody TableTopDto tableTopDto) {
+    public TableTopDto saveTable(@Valid @RequestBody TableTopDto tableTopDto) {
         return tableTopService.saveTable(tableTopDto);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping
-    public List<TableTopDto> getAllTables() {
-        return tableTopService.getAllTables();
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -42,21 +38,29 @@ public class TableTopController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping(path = "/{name}")
-    public TableTopDto updateTable(@PathVariable String name, @RequestBody TableTopDto tableTopDto) {
+    public TableTopDto updateTable(@PathVariable String name, @Valid @RequestBody TableTopDto tableTopDto) {
         return tableTopService.updateTable(name, tableTopDto);
+    }
+
+    // admin and waiter
+    @PreAuthorize("hasAnyRole('ADMIN', 'WAITER')")
+    @GetMapping
+    public List<TableTopDto> getAllTables() {
+        return tableTopService.getAllTables();
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'WAITER')")
     @PatchMapping(path = "/{name}/status")
-    public TableTopDto updateTableStatus(@PathVariable String name, @RequestBody String role) {
-        return tableTopService.updateTableStatusByName(name, role);
+    public TableTopDto updateTableStatus(@PathVariable String name, @Valid @RequestBody StringDto status) {
+        return tableTopService.updateTableStatusByName(name, status);
     }
 
-    // by customer
+    // public
     @PreAuthorize("permitAll()")
     @GetMapping(path = "/available")
     public List<TableTopDto> getAvailableTables() {
         return tableTopService.getAvailableTables();
     }
+
 
 }

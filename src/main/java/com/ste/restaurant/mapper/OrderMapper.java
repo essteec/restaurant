@@ -2,22 +2,28 @@ package com.ste.restaurant.mapper;
 
 import com.ste.restaurant.dto.*;
 import com.ste.restaurant.dto.userdto.UserDto;
+import com.ste.restaurant.dto.userdto.UserDtoCustomer;
+import com.ste.restaurant.dto.userdto.UserDtoEmployee;
 import com.ste.restaurant.entity.*;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring", uses = {})
 public interface OrderMapper {
-    OrderDto orderToOrderDto(Order order);
+    Address addressDtoToAddress(AddressDto addressDto);
 
-    OrderItemDto orderItemToOrderItemDto(OrderItem orderItem);
     UserDto userToUserDto(User user);
-    AddressDto addressToAddressDto(Address address);
+    UserDtoCustomer userToUserDtoCustomer(User user);
+    UserDtoEmployee userToUserDtoEmployee(User user);
+
     TableTopDto tableTopToTableTopDto(TableTop tableTop);
+
+    AddressDto addressToAddressDto(Address address);
+
     CallRequestDto callRequestToCallRequestDto(CallRequest callRequest);
 
-    Address addressDtoToAddress(AddressDto addressDto);
+    OrderDto orderToOrderDto(Order order);
+    OrderItemDto orderItemToOrderItemDto(OrderItem orderItem);
     OrderItem orderItemDtoToOrderItem(OrderItemDto orderItemDto);
-
     OrderItem orderItemDtoBasicToOrderItem(OrderItemDtoBasic orderItemDto);
 
 }

@@ -12,7 +12,11 @@ public class TableTop {
     @Column(name = "table_id")
     private Long tableId;
 
+    @Column(name = "table_number", nullable = false, unique = true)
     private String tableNumber;
+
+    @Column(nullable = false)
+    private Integer capacity;
 
     @Enumerated(EnumType.STRING)
     private TableStatus tableStatus = TableStatus.AVAILABLE;

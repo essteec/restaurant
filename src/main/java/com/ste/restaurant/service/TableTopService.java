@@ -1,12 +1,13 @@
 package com.ste.restaurant.service;
 
+import com.ste.restaurant.dto.StringDto;
 import com.ste.restaurant.dto.TableTopDto;
 import com.ste.restaurant.entity.TableStatus;
 import com.ste.restaurant.entity.TableTop;
+import com.ste.restaurant.exception.*;
 import com.ste.restaurant.repository.TableTopRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,11 +23,11 @@ public class TableTopService {
 
     public TableTopDto saveTable(TableTopDto tableTopDto) {
         if (tableTopDto.getTableNumber() == null) {
-            return null;
+            throw new NullValueException("Table", "number");
         }
 
         if (tableRepository.existsTableTopByTableNumber(tableTopDto.getTableNumber())) {
-            return null;
+            throw new AlreadyExistsException("Table", tableTopDto.getTableNumber());
         }
         TableTop tableTop = new TableTop();
         BeanUtils.copyProperties(tableTopDto, tableTop,
@@ -48,22 +49,19 @@ public class TableTopService {
     }
 
     public TableTopDto getTableByName(String name) {
-        Optional<TableTop> tableTop = tableRepository.findByTableNumber(name);
-        if (tableTop.isEmpty()) {
-            return null;
-        }
+        TableTop table = tableRepository.findByTableNumber(name)
+                .orElseThrow(() -> new NotFoundException("Table", name));
+
         TableTopDto tableTopDto = new TableTopDto();
-        BeanUtils.copyProperties(tableTop.get(), tableTopDto);
+        BeanUtils.copyProperties(table, tableTopDto);
         return tableTopDto;
     }
 
 
     public TableTopDto deleteTableByName(String name) {
-        Optional<TableTop> tableTop = tableRepository.findByTableNumber(name);
-        if (tableTop.isEmpty()) {
-            return null;
-        }
-        TableTop table = tableTop.get();
+        TableTop table = tableRepository.findByTableNumber(name)
+                .orElseThrow(() -> new NotFoundException("Table", name));
+
         tableRepository.delete(table);
         TableTopDto tableTopDto = new TableTopDto();
         BeanUtils.copyProperties(table, tableTopDto);
@@ -71,45 +69,44 @@ public class TableTopService {
     }
 
     public TableTopDto updateTable(String name, TableTopDto table) {
-        Optional<TableTop> tableTopOpt = tableRepository.findByTableNumber(name);
-        if (tableTopOpt.isEmpty()) {
-            return null;
-        }
-        TableTop tableOld = tableTopOpt.get();
-        if (table.getTableNumber() != null) {
+        TableTop tableOld = tableRepository.findByTableNumber(name)
+                .orElseThrow(() -> new NotFoundException("Table", name));
+
+        if (table.getTableNumber() != null && !table.getTableNumber().equals(name)) {
             if (tableRepository.findByTableNumber(table.getTableNumber()).isPresent()) {
-                return null;
+                throw new AlreadyExistsException("Table", table.getTableNumber());
             }
             tableOld.setTableNumber(table.getTableNumber());
         }
-        if (table.getTableStatus() != null) {
-            tableOld.setTableStatus(table.getTableStatus());
+        if (table.getCapacity() != null) {
+            tableOld.setCapacity(table.getCapacity());
         }
-        tableRepository.save(tableOld);
 
+        TableTop savedTable = tableRepository.save(tableOld);
         TableTopDto tableDto = new TableTopDto();
-        BeanUtils.copyProperties(table, tableDto);
+        BeanUtils.copyProperties(savedTable, tableDto);
         return tableDto;
     }
 
     @Transactional
-    public TableTopDto updateTableStatusByName(String name, String status) {
-        if (status == null) {
-            throw new IllegalArgumentException("Status must not be null");
+    public TableTopDto updateTableStatusByName(String name, StringDto statusDto) {
+        if (statusDto.getName() == null) {
+            throw new NullValueException("Table", "status");
         }
+        String status = statusDto.getName();
 
         TableTop table = tableRepository.findByTableNumber(name).
-                orElseThrow(() -> new UsernameNotFoundException("Table not found" + name));
+                orElseThrow(() -> new NotFoundException("Table", name));
 
         TableStatus newStatus;
         try {
             newStatus = TableStatus.valueOf(status.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid status " + status);
+            throw new InvalidValueException("Table", "status", status);
         }
 
-        if (table.getTableStatus() != null && table.getTableStatus().equals(newStatus)) {
-            return null;
+        if (table.getTableStatus().equals(newStatus)) {
+            throw new AlreadyHasException("Table", "status", status);
         }
 
         table.setTableStatus(newStatus);
