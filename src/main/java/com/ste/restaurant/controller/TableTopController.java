@@ -1,10 +1,9 @@
 package com.ste.restaurant.controller;
 
-import com.ste.restaurant.dto.StringDto;
+import com.ste.restaurant.dto.common.StringDto;
 import com.ste.restaurant.dto.TableTopDto;
 import com.ste.restaurant.service.TableTopService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,8 +13,11 @@ import java.util.List;
 @RestController
 public class TableTopController {
 
-    @Autowired
-    TableTopService tableTopService;
+    private final TableTopService tableTopService;
+
+    public TableTopController(TableTopService tableTopService) {
+        this.tableTopService = tableTopService;
+    }
 
     // by admin
     @PreAuthorize("hasRole('ADMIN')")
@@ -24,7 +26,7 @@ public class TableTopController {
         return tableTopService.saveTable(tableTopDto);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WAITER')")
     @GetMapping(path = "/by-name")
     public TableTopDto getTableByName(@RequestParam String name) {
         return tableTopService.getTableByName(name);

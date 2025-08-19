@@ -4,18 +4,26 @@ import com.ste.restaurant.dto.CategoryDtoBasic;
 import com.ste.restaurant.dto.FoodItemDto;
 import com.ste.restaurant.service.FoodItemService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import java.util.Set;
 
-@RequestMapping("/rest/api/food-items/")
+@PreAuthorize("hasRole('ADMIN')")
+@RequestMapping("/rest/api/food-items")
 @RestController
 public class FoodItemController {
-    @Autowired
-    private FoodItemService foodItemService;
+
+    private final FoodItemService foodItemService;
+
+    public FoodItemController(FoodItemService foodItemService) {
+        this.foodItemService = foodItemService;
+    }
 
     @PostMapping
     public FoodItemDto saveFoodItem(@Valid @RequestBody FoodItemDto foodItem) {
@@ -23,12 +31,12 @@ public class FoodItemController {
     }
 
     @GetMapping
-    public List<FoodItemDto> getAllFoodItems() {
-        return foodItemService.getAllFoodItems();
+    public Page<FoodItemDto> getAllFoodItems(@PageableDefault(size = 20) Pageable pageable) {
+        return foodItemService.getAllFoodItems(pageable);
     }
 
-    @GetMapping(path = "/by-name")
-    public FoodItemDto getFoodItemByName(@RequestParam String name) {
+    @GetMapping(path = "/{name}")
+    public FoodItemDto getFoodItemByName(@PathVariable String name) {
         return foodItemService.getFoodItemByName(name);
     }
 
@@ -43,9 +51,9 @@ public class FoodItemController {
     }
 
     // relation manyToMany foodItem -> category
-    @PreAuthorize("permitAll()")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping(path = "/{name}/categories")
-    public List<CategoryDtoBasic> getCategoriesOfFoodItem(@PathVariable String name) {
+    public Set<CategoryDtoBasic> getCategoriesOfFoodItem(@PathVariable String name) {
         return foodItemService.getCategories(name);
     }
 
@@ -53,5 +61,13 @@ public class FoodItemController {
     @PostMapping(path = "/{name}/image")
     public FoodItemDto uploadFoodImage(@PathVariable String name, @RequestParam("image") MultipartFile imageFile) {
         return foodItemService.addImageToFood(name, imageFile);
+    }
+
+    @DeleteMapping(path = "/{name}/image")
+    public ResponseEntity<Boolean> deleteFoodImage(@PathVariable String name) {
+        boolean deleted = foodItemService.deleteImageFile(name);
+        return deleted
+                ? ResponseEntity.ok().build()
+                : ResponseEntity.notFound().build();
     }
 }

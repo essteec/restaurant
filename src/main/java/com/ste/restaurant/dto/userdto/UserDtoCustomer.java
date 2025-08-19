@@ -6,8 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -17,8 +16,9 @@ import java.util.List;
 public class UserDtoCustomer {
     private String firstName;
     private String lastName;
+    private UserRole role;
     private String email;
-    private Date birthday;
+    private LocalDate birthday;
     private Integer loyaltyPoints;
     private List<AddressDto> addresses;
 }

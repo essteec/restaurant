@@ -1,20 +1,13 @@
 [
-  {
-    "orderTime": "2024-06-01T12:30:00",
-    "status": "PREPARING",
-    "totalPrice": "17.49",
-    "notes": "No onions on burger",
-    "customer": "rick@gmail.com",
-    "address": "Home",
-    "table": "7A"
-  },
-  {
-    "orderTime": "2024-06-01T13:15:00",
-    "status": "COMPLETED",
-    "totalPrice": "12.00",
-    "notes": "Extra cheese on salad",
-    "customer": "m.jackson@gmail.com",
-    "address": "Work",
-    "table": "8A"
-  }
+  { "orderTime": "2025-08-14T11:30:00", "status": "PREPARING", "totalPrice": "17.49", "notes": "No onions on burger", "customer": "rick@gmail.com", "address": "Home", "table": "7A" },
+  { "orderTime": "2025-08-14T11:25:00", "status": "COMPLETED", "totalPrice": "12.00", "notes": "Extra cheese on salad", "customer": "m.jackson@gmail.com", "address": "Work", "table": "8A" },
+  { "orderTime": "2025-08-14T10:00:00", "status": "PLACED", "totalPrice": "22.50", "notes": "Gluten free bread", "customer": "ayse@gmail.com", "address": "Summer House", "table": "9A" },
+  { "orderTime": "2025-08-14T10:30:00", "status": "READY", "totalPrice": "8.00", "notes": "Extra spicy", "customer": "john@gmail.com", "address": "City Center", "table": "7B" },
+  { "orderTime": "2025-08-14T12:00:00", "status": "DELIVERED", "totalPrice": "15.00", "notes": "No cheese", "customer": "elif@gmail.com", "address": "Grandparents", "table": "8B" },
+  { "orderTime": "2025-08-14T12:30:00", "status": "PREPARING", "totalPrice": "19.50", "notes": "Add lemon", "customer": "rick@gmail.com", "address": "Home", "table": "7A" },
+  { "orderTime": "2025-08-14T11:44:00", "status": "PLACED", "totalPrice": "10.00", "notes": "Vegetarian only", "customer": "ayse@gmail.com", "address": "Summer House", "table": "9A" },
+  { "orderTime": "2025-07-14T12:30:00", "status": "COMPLETED", "totalPrice": "19.50", "notes": "Add lemon", "customer": "rick@gmail.com", "address": "Home", "table": "7A" },
+  { "orderTime": "2025-07-14T11:44:00", "status": "COMPLETED", "totalPrice": "10.00", "notes": "Vegetarian only", "customer": "ayse@gmail.com", "address": "Summer House", "table": "9A" },
+  { "orderTime": "2025-07-14T12:30:00", "status": "COMPLETED", "totalPrice": "19.50", "notes": "Add lemon", "customer": "rick@gmail.com", "address": "Home", "table": "7A" },
+  { "orderTime": "2025-07-14T11:44:00", "status": "COMPLETED", "totalPrice": "10.00", "notes": "Vegetarian only", "customer": "ayse@gmail.com", "address": "Summer House", "table": "9A" }
 ]

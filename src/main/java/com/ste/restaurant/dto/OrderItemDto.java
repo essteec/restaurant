@@ -1,7 +1,5 @@
 package com.ste.restaurant.dto;
 
-import com.ste.restaurant.entity.FoodItem;
-import com.ste.restaurant.entity.Order;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

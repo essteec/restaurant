@@ -1,44 +1,32 @@
 [
-  {
-    "foodName": "Cheeseburger",
-    "description": "Juicy grilled beef patty with cheese, lettuce, tomato, and onion.",
-    "price": 8.99,
-    "categories": ["Main Course"]
-  },
-  {
-    "foodName": "French Fries",
-    "description": "Crispy golden fries with a pinch of salt.",
-    "price": 3.50,
-    "categories": ["Appetizers"]
-  },
-  {
-    "foodName": "Caesar Salad",
-    "description": "Fresh romaine lettuce, parmesan, croutons, and Caesar dressing.",
-    "price": 6.00,
-    "categories": ["Salads"]
-  },
-  {
-    "foodName": "Lentil Soup",
-    "description": "Traditional Turkish lentil soup served with lemon.",
-    "price": 4.00,
-    "categories": ["Soups"]
-  },
-  {
-    "foodName": "Grilled Chicken",
-    "description": "Marinated chicken breast grilled to perfection.",
-    "price": 10.50,
-    "categories": ["Main Course", "Grill"]
-  },
-  {
-    "foodName": "Chocolate Cake",
-    "description": "Rich chocolate layered cake with ganache.",
-    "price": 5.00,
-    "categories": ["Desserts"]
-  },
-  {
-    "foodName": "Cola",
-    "description": "Chilled soft drink.",
-    "price": 2.00,
-    "categories": ["Beverages"]
-  }
+  { "foodName": "Cheeseburger", "description": "Juicy grilled beef patty with cheese, lettuce, tomato, and onion.", "price": 8.99, "categories": ["Main Course"] },
+  { "foodName": "French Fries", "description": "Crispy golden fries with a pinch of salt.", "price": 3.50, "categories": ["Appetizers"] },
+  { "foodName": "Caesar Salad", "description": "Fresh romaine lettuce, parmesan, croutons, and Caesar dressing.", "price": 6.00, "categories": ["Salads"] },
+  { "foodName": "Lentil Soup", "description": "Traditional Turkish lentil soup served with lemon.", "price": 4.00, "categories": ["Appetizers", "Soups"] },
+  { "foodName": "Grilled Chicken", "description": "Marinated chicken breast grilled to perfection.", "price": 10.50, "categories": ["Main Course", "Grill"] },
+  { "foodName": "Chocolate Cake", "description": "Rich chocolate layered cake with ganache.", "price": 5.00, "categories": ["Desserts"] },
+  { "foodName": "Cola", "description": "Chilled soft drink.", "price": 2.00, "categories": ["Beverages"] },
+  { "foodName": "Pancakes", "description": "Fluffy pancakes served with maple syrup.", "price": 4.50, "categories": ["Breakfast"] },
+  { "foodName": "Omelette", "description": "Three-egg omelette with your choice of fillings.", "price": 5.00, "categories": ["Breakfast"] },
+  { "foodName": "Vegetable Stir Fry", "description": "Mixed vegetables stir-fried in a savory sauce.", "price": 7.00, "categories": ["Vegetarian"] },
+  { "foodName": "Quinoa Salad", "description": "Healthy quinoa salad with mixed greens and vinaigrette.", "price": 6.50, "categories": ["Vegetarian", "Salads"] },
+  { "foodName": "Ice Cream", "description": "Creamy vanilla ice cream served with chocolate sauce.", "price": 3.00, "categories": ["Desserts"] },
+  { "foodName": "Fruit Tart", "description": "Delicious tart filled with seasonal fruits and custard.", "price": 4.50, "categories": ["Desserts"] },
+  { "foodName": "Orange Juice", "description": "Freshly squeezed orange juice.", "price": 2.50, "categories": ["Beverages"] },
+  { "foodName": "Coffee", "description": "Hot brewed coffee, perfect for any time of day.", "price": 2.00, "categories": ["Beverages"] },
+  { "foodName": "Chicken Wings", "description": "Spicy grilled chicken wings served with dip.", "price": 7.50, "categories": ["Appetizers", "Grill"] },
+  { "foodName": "Greek Salad", "description": "Classic Greek salad with feta, olives, and tomatoes.", "price": 6.50, "categories": ["Salads", "Vegetarian"] },
+  { "foodName": "Mushroom Soup", "description": "Creamy mushroom soup garnished with herbs.", "price": 4.50, "categories": ["Soups", "Appetizers"] },
+  { "foodName": "Fish & Chips", "description": "Crispy battered fish with golden fries.", "price": 9.00, "categories": ["Main Course"] },
+  { "foodName": "Veggie Burger", "description": "Grilled vegetable patty with lettuce and tomato.", "price": 8.00, "categories": ["Vegetarian", "Main Course"] },
+  { "foodName": "Apple Pie", "description": "Classic apple pie with cinnamon.", "price": 4.00, "categories": ["Desserts"] },
+  { "foodName": "Soda Water", "description": "Refreshing soda water.", "price": 1.50, "categories": ["Beverages"] },
+  { "foodName": "Eggs Benedict", "description": "Poached eggs on English muffin with hollandaise sauce.", "price": 6.00, "categories": ["Breakfast"] },
+  { "foodName": "Falafel", "description": "Crispy chickpea balls served with tahini.", "price": 7.00, "categories": ["Vegetarian", "Appetizers"] },
+  { "foodName": "Steak", "description": "Grilled beef steak cooked to order.", "price": 15.00, "categories": ["Main Course", "Grill"] },
+  { "foodName": "Tomato Soup", "description": "Rich tomato soup with basil.", "price": 4.00, "categories": ["Soups"] },
+  { "foodName": "Fruit Salad", "description": "Fresh seasonal fruits tossed together.", "price": 5.00, "categories": ["Desserts", "Vegetarian"] },
+  { "foodName": "Spring Rolls", "description": "Crispy rolls stuffed with vegetables.", "price": 5.50, "categories": ["Appetizers", "Vegetarian"] },
+  { "foodName": "Lemonade", "description": "Homemade lemonade with fresh lemons.", "price": 2.50, "categories": ["Beverages"] },
+  { "foodName": "Tiramisu", "description": "Classic Italian dessert with coffee and mascarpone.", "price": 5.50, "categories": ["Desserts"] }
 ]

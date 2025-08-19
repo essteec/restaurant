@@ -7,19 +7,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDto {
-    private Long id;
+    private Long userId;
     private String firstName;
     private String lastName;
     private UserRole role;
     private String email;
-    private Date birthday;
+    private LocalDate birthday;
     private Integer loyaltyPoints;
     private BigDecimal salary;
     private List<AddressDto> addresses;

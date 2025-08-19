@@ -1,4 +1,4 @@
-package com.ste.restaurant.dto;
+package com.ste.restaurant.dto.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

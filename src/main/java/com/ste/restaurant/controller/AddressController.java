@@ -3,7 +3,6 @@ package com.ste.restaurant.controller;
 import com.ste.restaurant.dto.AddressDto;
 import com.ste.restaurant.service.AddressService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -15,8 +14,11 @@ import java.util.List;
 @RestController
 public class AddressController {
 
-    @Autowired
-    private AddressService addressService;
+    private final AddressService addressService;
+
+    public AddressController(AddressService addressService){
+        this.addressService = addressService;
+    }
 
     // customer
     @PostMapping

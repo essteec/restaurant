@@ -1,15 +1,18 @@
 package com.ste.restaurant.service;
 
 import com.ste.restaurant.dto.*;
+import com.ste.restaurant.dto.common.StringsDto;
+import com.ste.restaurant.dto.common.WarningResponse;
 import com.ste.restaurant.entity.Category;
 import com.ste.restaurant.entity.FoodItem;
 import com.ste.restaurant.exception.AlreadyExistsException;
 import com.ste.restaurant.exception.NotFoundException;
 import com.ste.restaurant.exception.NullValueException;
+import com.ste.restaurant.mapper.OrderMapper;
 import com.ste.restaurant.repository.CategoryRepository;
 import com.ste.restaurant.repository.FoodItemRepository;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -17,11 +20,15 @@ import java.util.*;
 @Service
 public class CategoryService {
 
-    @Autowired
-    CategoryRepository categoryRepository;
+    private final CategoryRepository categoryRepository;
+    private final FoodItemRepository foodItemRepository;
+    private final OrderMapper orderMapper;
 
-    @Autowired
-    private FoodItemRepository foodItemRepository;
+    public CategoryService(CategoryRepository categoryRepo, FoodItemRepository foodItemRepo, OrderMapper orderMapper) {
+        this.categoryRepository = categoryRepo;
+        this.foodItemRepository = foodItemRepo;
+        this.orderMapper = orderMapper;
+    }
 
     public CategoryDtoBasic saveCategory(CategoryDtoBasic category) {
         if (category.getCategoryName() == null) {
@@ -31,42 +38,25 @@ public class CategoryService {
             throw new AlreadyExistsException("Category", category.getCategoryName());
         }
 
-        Category categorySave = new Category();
-        BeanUtils.copyProperties(category, categorySave);
-        categoryRepository.save(categorySave);
-        return category;
+        Category savedCategory = categoryRepository.save(orderMapper.categoryDtoBasicToCategory(category));
+        return orderMapper.categoryToCategoryDtoBasic(savedCategory);
     }
 
-    public List<CategoryDto> listAllCategory() {
-        List<Category> categories = categoryRepository.findAll();
-        List<CategoryDto> categoryDtos = new ArrayList<>();
-
-        for (Category category : categories) {
-            CategoryDto categoryDto = new CategoryDto();
-            BeanUtils.copyProperties(category, categoryDto);
-
-            categoryDto.setFoods(new HashSet<>());
-            for (FoodItem food : category.getFoodItems()) {
-                FoodItemDto foodItemDto = new FoodItemDto();
-                BeanUtils.copyProperties(food, foodItemDto);
-                categoryDto.getFoods().add(foodItemDto);
-            }
-            categoryDtos.add(categoryDto);
-        }
-        return categoryDtos;
+    public Page<CategoryDto> listAllCategory(Pageable pageable) {
+        Page<Category> categories = categoryRepository.findAll(pageable);
+        return categories.map(orderMapper::categoryToCategoryDto);
     }
 
     public CategoryDto deleteCategoryByName(String name) {
         Category category = categoryRepository.findByCategoryName(name)
                 .orElseThrow(() -> new NotFoundException("Category", name));
 
-        CategoryDto categoryDto = new CategoryDto();
-        BeanUtils.copyProperties(category, categoryDto);
-        categoryDto.setFoods(new HashSet<>());
+        CategoryDto categoryDto = orderMapper.categoryToCategoryDto(category);
+        categoryDto.setFoodItems(new HashSet<>());
         for (FoodItem food : category.getFoodItems()) {
-            FoodItemDto foodItemDto = new FoodItemDto();
-            BeanUtils.copyProperties(food, foodItemDto);
-            categoryDto.getFoods().add(foodItemDto);
+            categoryDto.getFoodItems().add(
+                    orderMapper.foodItemToFoodItemDto(food)
+            );
         }
         categoryRepository.delete(category);
         return categoryDto;
@@ -81,23 +71,11 @@ public class CategoryService {
                 throw new AlreadyExistsException("Category", category.getCategoryName());
             }
         }
-        BeanUtils.copyProperties(category, categoryOld,
-                ServiceUtil.getNullPropertyNames(category));
+        orderMapper.updateCategoryFromDto(category, categoryOld);
 
         Category savedCategory = categoryRepository.save(categoryOld);
 
-        CategoryDto categoryResponse = new CategoryDto();
-        BeanUtils.copyProperties(savedCategory, categoryResponse);
-
-        categoryResponse.setFoods(new HashSet<>());
-        if (savedCategory.getFoodItems() != null) {
-            for (FoodItem food : savedCategory.getFoodItems()) {
-                FoodItemDto foodItemDto = new FoodItemDto();
-                BeanUtils.copyProperties(food, foodItemDto);
-                categoryResponse.getFoods().add(foodItemDto);
-            }
-        }
-        return categoryResponse;
+        return orderMapper.categoryToCategoryDto(savedCategory);
     }
 
     // relation with food item
@@ -118,15 +96,7 @@ public class CategoryService {
         }
         Category savedCategory = categoryRepository.save(category);
 
-        CategoryDto categoryResponse = new CategoryDto();
-        BeanUtils.copyProperties(savedCategory, categoryResponse);
-        categoryResponse.setFoods(new HashSet<>());
-
-        for (FoodItem food : savedCategory.getFoodItems()) {
-            FoodItemDto foodItemDto = new FoodItemDto();
-            BeanUtils.copyProperties(food, foodItemDto);
-            categoryResponse.getFoods().add(foodItemDto);
-        }
+        CategoryDto categoryResponse = orderMapper.categoryToCategoryDto(savedCategory);
         return new WarningResponse<>(categoryResponse, failedNames);
     }
 
@@ -145,17 +115,9 @@ public class CategoryService {
                 category.getFoodItems().remove(foodItem.get());
             }
         }
-
         Category savedCategory = categoryRepository.save(category);
 
-        CategoryDto categoryResponse = new CategoryDto();
-        BeanUtils.copyProperties(savedCategory, categoryResponse);
-        categoryResponse.setFoods(new HashSet<>());
-        for (FoodItem food : savedCategory.getFoodItems()) {
-            FoodItemDto foodItemDto = new FoodItemDto();
-            BeanUtils.copyProperties(food, foodItemDto);
-            categoryResponse.getFoods().add(foodItemDto);
-        }
+        CategoryDto categoryResponse = orderMapper.categoryToCategoryDto(savedCategory);
         return new WarningResponse<>(categoryResponse, failedNames);
     }
 }

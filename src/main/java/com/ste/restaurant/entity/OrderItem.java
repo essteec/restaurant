@@ -2,6 +2,8 @@ package com.ste.restaurant.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 
@@ -11,22 +13,24 @@ import java.math.BigDecimal;
 public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long OrderItemId;
+    private Long orderItemId;
 
     private Integer quantity;
 
-    @Column(name = "unit_price")
     private BigDecimal unitPrice;
 
-    @Column(name = "total_price")
     private BigDecimal totalPrice;
 
     private String note;
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "food_id")
     private FoodItem foodItem;
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "order_id")
     private Order order;

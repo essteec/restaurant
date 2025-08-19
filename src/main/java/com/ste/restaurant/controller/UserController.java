@@ -1,16 +1,15 @@
 package com.ste.restaurant.controller;
 
 import com.ste.restaurant.dto.AddressDto;
-import com.ste.restaurant.dto.BigDecimalDto;
-import com.ste.restaurant.dto.StringDto;
-import com.ste.restaurant.dto.userdto.UserDto;
-import com.ste.restaurant.dto.userdto.UserDtoCustomer;
-import com.ste.restaurant.dto.userdto.UserDtoEmployee;
-import com.ste.restaurant.dto.userdto.UserDtoIO;
+import com.ste.restaurant.dto.common.BigDecimalDto;
+import com.ste.restaurant.dto.common.StringDto;
+import com.ste.restaurant.dto.userdto.*;
 import com.ste.restaurant.service.AddressService;
 import com.ste.restaurant.service.UserService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -21,10 +20,13 @@ import java.util.List;
 @PreAuthorize("hasRole('ADMIN')")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private AddressService addressService;
+    private final UserService userService;
+    private final AddressService addressService;
+
+    public UserController(UserService userService, AddressService addressService) {
+        this.userService = userService;
+        this.addressService = addressService;
+    }
 
     // Admin
     @PostMapping
@@ -33,11 +35,11 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserDto> getAllUsers(@RequestParam(required = false) String role) {
+    public Page<UserDto> getAllUsers(@RequestParam(required = false) String role, @PageableDefault(size = 20) Pageable pageable) {
         if (role == null) {
-            return userService.getAllUsers();
+            return userService.getAllUsers(pageable);
         }
-        return userService.getAllUsersByRole(role);
+        return userService.getAllUsersByRole(role, pageable);
     }
 
     @GetMapping(path = "/{id}")
@@ -51,7 +53,7 @@ public class UserController {
     }
 
     @PutMapping(path = "/{id}")
-    public UserDto updateUserById(@PathVariable Long id, @Valid @RequestBody UserDtoIO userDto) {
+    public UserDto updateUserById(@PathVariable Long id, @Valid @RequestBody UserDtoEmployee userDto) {
         return userService.updateUserById(id, userDto);
     }
 
@@ -67,15 +69,15 @@ public class UserController {
 
     // admin address
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping(path = "/{userId}/addresses")
-    public List<AddressDto> getAddressesByUserId(@PathVariable Long userId){
-        return addressService.getAddressesOfUser(userId);
+    @GetMapping(path = "/{id}/addresses")
+    public List<AddressDto> getAddressesByUserId(@PathVariable Long id){
+        return addressService.getAddressesOfUser(id);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping(path = "/{userId}/addresses/{addressId}")
-    public AddressDto deleteAddressById(@PathVariable Long userId,  @PathVariable Long addressId){
-        return addressService.deleteAddressById(userId, addressId);
+    @DeleteMapping(path = "/{id}/addresses/{addressId}")
+    public AddressDto deleteAddressById(@PathVariable Long id,  @PathVariable Long addressId){
+        return addressService.deleteAddressById(id, addressId);
     }
 
     // PROFILE
@@ -102,4 +104,11 @@ public class UserController {
     public UserDtoEmployee getEmployeeProfile(Authentication auth) {
         return userService.getEmployeeByEmail(auth.getName());
     }
+
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping(path = "/me/password")
+    public UserDtoCustomer changeUserPassword(@RequestBody @Valid PasswordChangeDto passwordData, Authentication auth) {
+        return userService.changePassword(auth.getName(), passwordData);
+    }
+
 }

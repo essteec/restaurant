@@ -3,18 +3,48 @@
     "menuName": "Lunch Menu",
     "description": "Available from 12:00 to 15:00. Includes main courses and salads.",
     "active": true,
-    "foodItems": ["Cheeseburger", "Caesar Salad"]
+    "foodItems": ["Cheeseburger", "Caesar Salad", "French Fries", "Fish & Chips", "Greek Salad", "Lentil Soup"]
   },
   {
     "menuName": "Dinner Menu",
     "description": "Available from 18:00 to 23:00. Includes grill and desserts.",
     "active": true,
-    "foodItems": ["Grilled Chicken", "Chocolate Cake"]
+    "foodItems": ["Grilled Chicken", "Chocolate Cake", "Steak", "Chicken Wings", "Tiramisu", "Apple Pie"]
   },
   {
     "menuName": "Kids Menu",
     "description": "Special menu for children under 12.",
     "active": false,
-    "foodItems": ["French Fries", "Cola"]
+    "foodItems": ["French Fries", "Cola", "Ice Cream", "Pancakes", "Spring Rolls"]
+  },
+  {
+    "menuName": "Vegetarian Menu",
+    "description": "Includes a variety of vegetarian dishes.",
+    "active": true,
+    "foodItems": ["Vegetable Stir Fry", "Quinoa Salad", "Greek Salad", "Falafel", "Fruit Salad"]
+  },
+  {
+    "menuName": "Dessert Menu",
+    "description": "A selection of sweet treats available all day.",
+    "active": true,
+    "foodItems": ["Ice Cream", "Fruit Tart", "Apple Pie", "Tiramisu"]
+  },
+  {
+    "menuName": "Breakfast Menu",
+    "description": "Served from 07:00 to 11:00. Includes breakfast items.",
+    "active": true,
+    "foodItems": ["Pancakes", "Omelette", "Eggs Benedict"]
+  },
+  {
+    "menuName": "Beverage Menu",
+    "description": "A variety of drinks including soft drinks and juices.",
+    "active": true,
+    "foodItems": ["Coffee", "Orange Juice", "Cola", "Soda Water", "Lemonade"]
+  },
+  {
+    "menuName": "Specials Menu",
+    "description": "Weekly specials that change every Monday.",
+    "active": false,
+    "foodItems": ["Mushroom Soup", "Veggie Burger", "Tomato Soup"]
   }
 ]

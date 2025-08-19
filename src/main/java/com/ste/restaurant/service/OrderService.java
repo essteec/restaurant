@@ -1,56 +1,54 @@
 package com.ste.restaurant.service;
 
 import com.ste.restaurant.dto.*;
+import com.ste.restaurant.dto.common.StringDto;
+import com.ste.restaurant.dto.common.WarningResponse;
 import com.ste.restaurant.entity.*;
 import com.ste.restaurant.exception.*;
 import com.ste.restaurant.mapper.OrderMapper;
 import com.ste.restaurant.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
 
-    @Autowired
-    private OrderRepository orderRepository;
+    private final OrderRepository orderRepository;
+    private final OrderItemRepository orderItemRepository;
+    private final FoodItemRepository foodItemRepository;
+    private final UserRepository userRepository;
+    private final TableTopRepository tableTopRepository;
+    private final AddressRepository addressRepository;
+    private final OrderMapper orderMapper;
 
-    @Autowired
-    private OrderItemRepository orderItemRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private OrderMapper orderMapper;
-
-    @Autowired
-    private FoodItemRepository foodItemRepository;
-
-    @Autowired
-    private AddressRepository addressRepository;
-
-    @Autowired
-    private TableTopRepository tableTopRepository;
-
-    public List<OrderDto> getOrderList() {
-        List<Order> orders = orderRepository.findAll();
-        List<OrderDto> orderDtos = new ArrayList<>();
-
-        for (Order order : orders) {
-            OrderDto orderDto = orderMapper.orderToOrderDto(order);
-            orderDtos.add(orderDto);
-        }
-        return orderDtos;
+    public OrderService(OrderRepository orderRepo, OrderItemRepository orderItemRepo,
+                        FoodItemRepository foodItemRepo, UserRepository userRepo,
+                        TableTopRepository tableTopRepo, AddressRepository addressRepo, OrderMapper orderMapper) {
+        this.orderRepository = orderRepo;
+        this.orderItemRepository = orderItemRepo;
+        this.foodItemRepository = foodItemRepo;
+        this.userRepository = userRepo;
+        this.tableTopRepository = tableTopRepo;
+        this.addressRepository = addressRepo;
+        this.orderMapper = orderMapper;
     }
 
-    public List<OrderDto> getAllOrdersBy(String status) {
+    public Page<OrderDto> getOrderList(Pageable pageable) {
+        Page<Order> orders = orderRepository.findAll(pageable);
+
+        return orders.map(orderMapper::orderToOrderDto);
+    }
+
+    public Page<OrderDto> getAllOrdersBy(String status, Pageable pageable) {
         OrderStatus orderStatus;
         try {
             orderStatus = OrderStatus.valueOf(status.toUpperCase());
@@ -58,14 +56,15 @@ public class OrderService {
             throw new InvalidValueException("Order", "status", status);
         }
 
-        List<Order> orders = orderRepository.findAllByStatus(orderStatus);
-        List<OrderDto> orderDtos = new ArrayList<>();
-        for (Order order : orders) {
-            OrderDto orderDto = orderMapper.orderToOrderDto(order);
-            orderDtos.add(orderDto);
-        }
+        Page<Order> orders = orderRepository.findAllByStatus(orderStatus, pageable);
+        return orders.map(orderMapper::orderToOrderDto);
+    }
 
-        return orderDtos;
+    // get all orders for waiter or chef
+    public Page<OrderDto> getAllOrdersBy(List<OrderStatus> statuses, Pageable pageable) {
+        Page<Order> orders = orderRepository.findAllByStatusInAndOrderTimeAfter(statuses,
+                LocalDate.now().atStartOfDay().plusHours(6), pageable);
+        return orders.map(orderMapper::orderToOrderDto);
     }
 
     public OrderDto getOrderById(Long id) {
@@ -81,7 +80,6 @@ public class OrderService {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Order", id));
 
-
         if (!order.getCustomer().getEmail().equals(email)) {
             throw new NotFoundException("Order", id);
         }
@@ -92,23 +90,12 @@ public class OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order", orderId));
 
-        List<OrderItemDto> orderItemDtos = new ArrayList<>();
-        for (OrderItem orderItem : order.getOrderItems()) {
-            OrderItemDto orderItemDto = orderMapper.orderItemToOrderItemDto(orderItem);
-            orderItemDtos.add(orderItemDto);
-        }
-
-        return orderItemDtos;
+        return orderMapper.orderItemsToOrderItemDtos(order.getOrderItems());
     }
 
-    public List<OrderItemDto> getOrderItemList() {
-        List<OrderItemDto> orderItemDtos = new ArrayList<>();
-        List<OrderItem> orderItems = orderItemRepository.findAll();
-        for (OrderItem orderItem : orderItems) {
-            OrderItemDto orderItemDto = orderMapper.orderItemToOrderItemDto(orderItem);
-            orderItemDtos.add(orderItemDto);
-        }
-        return orderItemDtos;
+    public Page<OrderItemDto> getOrderItemList(Pageable pageable) {
+        Page<OrderItem> orderItems = orderItemRepository.findAll(pageable);
+        return orderItems.map(orderMapper::orderItemToOrderItemDto);
     }
 
     @Transactional
@@ -116,16 +103,13 @@ public class OrderService {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Order", id));
 
-        orderItemRepository.deleteAll(order.getOrderItems());
         orderRepository.delete(order);
         return orderMapper.orderToOrderDto(order);
     }
 
     //  by admin or waiter
+    @Transactional
     public OrderDto updateOrderStatus(Long orderId, StringDto statusDto) {
-        if (statusDto.getName() == null) {
-            throw new NullValueException("Order", "status");
-        }
         String status = statusDto.getName();
 
         Order order = orderRepository.findById(orderId)
@@ -142,57 +126,64 @@ public class OrderService {
             throw new AlreadyHasException("Order", "status", status);
         }
 
-        if (newStatus.equals(OrderStatus.COMPLETED)) {
-            mergeRecentOrders(order);
-        }
-
         order.setStatus(newStatus);
         orderRepository.save(order);
+
+        if (newStatus == OrderStatus.COMPLETED) {
+            order.getTable().setTableStatus(TableStatus.AVAILABLE);
+            tableTopRepository.save(order.getTable());
+        }
+        if (newStatus.equals(OrderStatus.DELIVERED)) {
+            mergeRecentOrders(order);
+        }
         return getOrderById(orderId);
     }
 
     // Customer
-    public OrderDto placeOrder(PlaceOrderDto placingDto, String email) {
-        if (placingDto.getOrderItems() == null || placingDto.getOrderItems().isEmpty()) {
-            throw new NotFoundException("OrderItems");
-        }
+    @Transactional
+    public WarningResponse<OrderDto> placeOrder(PlaceOrderDto placingDto, String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User", email));
 
         Order order = new Order();
 
-        if (user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.WAITER) {
-            order.setCustomer(null);
-        }  else order.setCustomer(user);
+        order.setCustomer(user);
 
         order.setNotes(placingDto.getNotes());
         order.setOrderTime(LocalDateTime.now());
         order.setStatus(OrderStatus.PLACED);
 
         if (placingDto.getAddressId() != null) {
-            Address address = addressRepository.findById(placingDto.getAddressId()).orElse(null);
-            if (address != null && user.getAddresses().contains(address)) {
-                order.setAddress(address);
+            Address address = addressRepository.findById(placingDto.getAddressId())
+                    .orElseThrow(() -> new  NotFoundException("Address", placingDto.getAddressId()));
+            if (user.getRole().equals(UserRole.CUSTOMER) && !user.getAddresses().contains(address)) {
+                throw new NotFoundException("Address", placingDto.getAddressId());
             }
+            order.setAddress(address);
         }
         else if (placingDto.getTableNumber() != null) {
-            TableTop table = tableTopRepository.findByTableNumber(placingDto.getTableNumber()).orElse(null);
-            if (table != null) {
-                table.setTableStatus(TableStatus.OCCUPIED);
-                order.setTable(table);
-            }
+            TableTop table = tableTopRepository.findByTableNumber(placingDto.getTableNumber())
+                    .orElseThrow(() -> new NotFoundException("Table", placingDto.getTableNumber()));
+
+            table.setTableStatus(TableStatus.OCCUPIED);
+            tableTopRepository.save(table);
+            order.setTable(table);
+
         } else {
-            throw new InvalidValueException("Order", "address id and table number", "[Null Value]");
+            throw new InvalidValueException("Order", "location", "Either table number or address must be provided");
         }
 
         List<OrderItem> orderItems = new ArrayList<>();
         BigDecimal totalPrice = BigDecimal.ZERO;
+        List<String> failedNames = new ArrayList<>();
 
         for (OrderItemDtoBasic orderItemDto : placingDto.getOrderItems()) {
             FoodItem foodItem = foodItemRepository.findByFoodName(orderItemDto.getFoodName())
                     .orElse(null);
-            if (foodItem == null) continue;
-
+            if (foodItem == null) {
+                failedNames.add(orderItemDto.getFoodName());
+                continue;
+            }
             OrderItem orderItem = orderMapper.orderItemDtoBasicToOrderItem(orderItemDto);
             orderItem.setFoodItem(foodItem);
             orderItem.setUnitPrice(foodItem.getPrice());
@@ -202,9 +193,13 @@ public class OrderService {
             orderItem.setOrder(order);
 
             totalPrice = totalPrice.add(itemTotal);
-
             orderItems.add(orderItem);
         }
+
+        if (orderItems.isEmpty()) {
+            throw new InvalidValueException("Order", "OrderItems", "No valid order items found");
+        }
+
         order.setOrderItems(orderItems);
         order.setTotalPrice(totalPrice);
 
@@ -212,7 +207,7 @@ public class OrderService {
 
         OrderDto orderDto = orderMapper.orderToOrderDto(order);
         orderDto.setCustomer(null);
-        return orderDto;
+        return new WarningResponse<>(orderDto, failedNames);
     }
 
     public OrderDto getLastOrder(String email) {
@@ -232,17 +227,33 @@ public class OrderService {
         User user =  userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User", email));
 
-        List<Order> orders = orderRepository.findAllByCustomerEmailOrderByOrderTimeDesc(user.getEmail());
-        List<OrderDto> orderDtos = new ArrayList<>();
-        for (Order order : orders) {
-            OrderDto orderDto = orderMapper.orderToOrderDto(order);
-            orderDto.setCustomer(null);
-            orderDtos.add(orderDto);
+        List<Order> orders;
+        if (user.getRole().equals(UserRole.CUSTOMER)) {
+            orders = orderRepository.findAllByCustomerEmailOrderByOrderTimeDesc(user.getEmail());
         }
-        return orderDtos;
+        else if (user.getRole().equals(UserRole.WAITER)) {
+            // get all the orders that are not completed
+            orders = orderRepository.findAllByStatusNotAndOrderTimeAfterOrderByOrderTimeDesc(
+                    OrderStatus.COMPLETED,
+                    LocalDate.now().atStartOfDay().plusHours(6)
+            );
+        }
+        else if (user.getRole().equals(UserRole.CHEF)) {
+            // get all the orders that are in placed, preparing, ready, cancelled.
+            orders = orderRepository.findAllByStatusInAndOrderTimeAfterOrderByOrderTimeDesc(
+                    List.of(OrderStatus.PLACED, OrderStatus.PREPARING, OrderStatus.READY, OrderStatus.CANCELLED),
+                    LocalDate.now().atStartOfDay().plusHours(6)
+            );
+        }
+        else {
+            throw new InvalidValueException("User", "role", "Unsupported user role for this operation");
+        }
+
+        return orderMapper.ordersToOrderDtos(orders);
     }
 
     // by customer or waiter
+    @Transactional
     public OrderDto cancelOrderIfNotReady(Long orderId, String email) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order", orderId));
@@ -255,7 +266,8 @@ public class OrderService {
             orderRepository.save(order);
             return getOrderById(orderId);
         }
-        else if (!order.getCustomer().getEmail().equals(email)) {
+
+        if (!order.getCustomer().getEmail().equals(email)) {
             throw new NotFoundException("Order", orderId);
         }
 
@@ -263,14 +275,13 @@ public class OrderService {
             order.setStatus(OrderStatus.CANCELLED);
             orderRepository.save(order);
         }
+        else throw new InvalidValueException("Order", "status", "Cannot cancel this order is already in the way");
         return getOrderById(orderId);
     }
 
     // by admin or waiter
+    @Transactional
     public OrderDto changeTableOfOrder(Long orderId, StringDto tableNumberDto) {
-        if (tableNumberDto == null) {
-            throw new NullValueException("Table", "number");
-        }
         String tableNumber = tableNumberDto.getName();
 
         Order order = orderRepository.findById(orderId)
@@ -279,59 +290,77 @@ public class OrderService {
         TableTop table = tableTopRepository.findByTableNumber(tableNumber)
                 .orElseThrow(() -> new NotFoundException("Table", tableNumber));
 
+        if (order.getTable() == null) {
+            throw new NullValueException("Order", "table");
+        }
+
         if (tableNumber.equals(order.getTable().getTableNumber())) {
             throw new AlreadyHasException("Table", "number", tableNumber);
         }
 
+        // set old table as available
+        order.getTable().setTableStatus(TableStatus.AVAILABLE);
+        tableTopRepository.save(order.getTable());
+
+        // set new table as occupied
+        table.setTableStatus(TableStatus.OCCUPIED);
+        tableTopRepository.save(table);
+
+        // finally set order with new table
         order.setTable(table);
         orderRepository.save(order);
+
         return getOrderById(orderId);
     }
 
     public List<OrderItemDto> getOrderItemsForUser(Long orderId, String email) {
-
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order", orderId));
 
         if (!order.getCustomer().getEmail().equals(email)) {
-            throw new NotFoundException("OrderItems");
+            throw new NotFoundException("Order", orderId);
         }
 
-        List<OrderItemDto> orderItemDtos = new ArrayList<>();
-        for (OrderItem orderItem : order.getOrderItems()) {
-            orderItemDtos.add(orderMapper.orderItemToOrderItemDto(orderItem));
-        }
-
-        return orderItemDtos;
+        return orderMapper.orderItemsToOrderItemDtos(order.getOrderItems());
     }
 
     @Transactional
     public void mergeRecentOrders(Order mainOrder) {
+        if (mainOrder.getTable() == null) return;
 
-
-        List<Order> recentOrders = orderRepository.findAllByCustomerAndAddressAndStatusAndOrderTimeBetween(
+        List<Order> recentOrders = orderRepository.findAllByCustomerAndTableAndStatusAndOrderTimeBetween(
                 mainOrder.getCustomer(),
-                mainOrder.getAddress(),
-                OrderStatus.COMPLETED,
-                LocalDateTime.now().minusMinutes(60),
-                LocalDateTime.now().minusMinutes(1)
+                mainOrder.getTable(),
+                OrderStatus.DELIVERED,
+                LocalDateTime.now().minusMinutes(90),
+                mainOrder.getOrderTime().minusMinutes(1)
         );
 
-        recentOrders.removeIf(order -> order.getOrderId().equals(mainOrder.getOrderId()));
+        if (recentOrders.isEmpty()) return;
+
+        BigDecimal total = mainOrder.getTotalPrice();
+        StringBuilder mergedNotes = new StringBuilder(mainOrder.getNotes() != null ? mainOrder.getNotes() : "");
+
         for (Order order : recentOrders) {
-            mainOrder.setTotalPrice(mainOrder.getTotalPrice().add(order.getTotalPrice()));
+            total = total.add(order.getTotalPrice());
 
-            mainOrder.setNotes(
-                    (mainOrder.getNotes() != null ? mainOrder.getNotes() : "") +
-                    (order.getNotes() != null ? "\n" + order.getNotes() : "")
-            );
+            if (order.getNotes() != null && !order.getNotes().trim().isEmpty()) {
+                if (!mergedNotes.isEmpty()) {
+                    mergedNotes.append("\n");
+                }
+                mergedNotes.append(order.getNotes());
+            }
 
-            order.getOrderItems().forEach(item -> item.setOrder(mainOrder));
-            mainOrder.getOrderItems().addAll(order.getOrderItems());
-
-            orderRepository.delete(order);
+            for (OrderItem item : order.getOrderItems()) {
+                item.setOrder(mainOrder);
+                mainOrder.getOrderItems().add(item);
+            }
         }
 
+        mainOrder.setTotalPrice(total);
+        mainOrder.setNotes(mergedNotes.toString());
+
         orderRepository.save(mainOrder);
+        orderRepository.deleteAll(recentOrders);
     }
 }

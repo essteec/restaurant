@@ -17,8 +17,10 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.ZoneId;
 import java.util.*;
 
 @Component
@@ -37,7 +39,7 @@ public class DataSeeder implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
 
     private final ObjectMapper mapper = new ObjectMapper();
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private final DateTimeFormatter birthdayFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private final DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     public DataSeeder(
@@ -147,7 +149,6 @@ public class DataSeeder implements CommandLineRunner {
                         for (String catName : categories) {
                             Category cat = categoryMap.get(catName);
                             if (cat != null) {
-                                if (cat.getFoodItems() == null) cat.setFoodItems(new HashSet<>());
                                 cat.getFoodItems().add(fi);
                                 categoryRepository.save(cat);
                             }
@@ -230,7 +231,7 @@ public class DataSeeder implements CommandLineRunner {
                 u.setEmail((String) raw.get("email"));
                 u.setPassword(passwordEncoder.encode((String) raw.get("password")));
                 u.setRole(UserRole.valueOf((String) raw.get("role")));
-                if (raw.get("birthday") != null) u.setBirthday(dateFormat.parse((String) raw.get("birthday")));
+                if (raw.get("birthday") != null) u.setBirthday(LocalDate.parse((String) raw.get("birthday"), birthdayFormat));
                 if (raw.get("loyaltyPoints") != null) u.setLoyaltyPoints((Integer) raw.get("loyaltyPoints"));
                 if (raw.get("salary") != null) u.setSalary(new BigDecimal(raw.get("salary").toString()));
                 List<Address> userAddresses = new ArrayList<>();

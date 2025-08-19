@@ -1,24 +1,24 @@
 package com.ste.restaurant.controller;
 
-import com.ste.restaurant.dto.MenuDto;
-import com.ste.restaurant.dto.MenuDtoBasic;
-import com.ste.restaurant.dto.StringsDto;
-import com.ste.restaurant.dto.WarningResponse;
+import com.ste.restaurant.dto.*;
+import com.ste.restaurant.dto.common.StringsDto;
+import com.ste.restaurant.dto.common.WarningResponse;
 import com.ste.restaurant.service.MenuService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Set;
 
 @RequestMapping("/rest/api/menus")
 @RestController
 public class MenuController {
 
-    @Autowired
-    private MenuService menuService;
+    private final MenuService menuService;
+
+    public MenuController(MenuService menuService) {
+        this.menuService = menuService;
+    }
 
     // by admin
     @PreAuthorize("hasRole('ADMIN')")
@@ -53,33 +53,27 @@ public class MenuController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(path = "/active")
-    public List<MenuDto> setActiveMenu(@Valid @RequestBody StringsDto menuNames) {
+    public WarningResponse<List<MenuDto>> setActiveMenu(@Valid @RequestBody StringsDto menuNames) {
         return menuService.setActiveMenu(menuNames);
     }
 
     // relation manyToMany menu -> foodItem
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping(path = "/{menuName}/food-items")
-    public WarningResponse<MenuDto> addFoodsToMenu(@PathVariable String menuName, @Valid @RequestBody StringsDto foodNames) {
-        return menuService.addFoodsToMenu(menuName, foodNames);
+    @PutMapping(path = "/{name}/food-items")
+    public WarningResponse<MenuDto> addFoodsToMenu(@PathVariable String name, @Valid @RequestBody StringsDto foodNames) {
+        return menuService.addFoodsToMenu(name, foodNames);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping(path = "/{menuName}/food-items")
-    public WarningResponse<MenuDto> removeFoodItemFromMenu(@PathVariable String menuName, @Valid @RequestBody StringsDto foodNames) {
-        return menuService.removeFoodsFromMenu(menuName, foodNames);
+    @DeleteMapping(path = "/{name}/food-items")
+    public WarningResponse<MenuDto> removeFoodItemFromMenu(@PathVariable String name, @Valid @RequestBody StringsDto foodNames) {
+        return menuService.removeFoodsFromMenu(name, foodNames);
     }
-
-    // by customer
+    // TODO restaurant name, email, ourStory, mainLine, line, openingHours, phone, foodIds, galleryImages, address, location, social media links,
+    // by customer // todo get menu that named "website menu" which has 3 exact food for showcase in main page
     @PreAuthorize("permitAll()")
     @GetMapping(path = "/active")
-    public List<MenuDto> getActiveMenu() {
+    public List<CategoryDto> getActiveMenu() {
         return menuService.getActiveMenu();
-    }
-
-    @PreAuthorize("permitAll()")
-    @GetMapping(path = "/active/by-category")
-    public List<MenuDto> getActiveMenuByCategory(@RequestParam String categoryName) {
-        return menuService.getActiveMenuByCategory(categoryName);
     }
 }

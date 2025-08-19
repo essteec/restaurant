@@ -9,25 +9,28 @@ import com.ste.restaurant.mapper.OrderMapper;
 import com.ste.restaurant.repository.CallRequestRepository;
 import com.ste.restaurant.repository.OrderRepository;
 import com.ste.restaurant.repository.UserRepository;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CallRequestService {
-    @Autowired
-    private CallRequestRepository callRequestRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private OrderRepository orderRepository;
-    @Autowired
-    private OrderMapper orderMapper;
+    private final CallRequestRepository callRequestRepository;
+    private final OrderRepository orderRepository;
+    private final UserRepository userRepository;
+    private final OrderMapper orderMapper;
+
+    public CallRequestService(CallRequestRepository callRequestRepo, OrderRepository orderRepo,
+                              UserRepository userRepo, OrderMapper orderMapper) {
+        this.callRequestRepository = callRequestRepo;
+        this.orderRepository = orderRepo;
+        this.userRepository = userRepo;
+        this.orderMapper = orderMapper;
+    }
 
     public CallRequestDto getCallRequestById(Long id) {
         CallRequest callRequest = callRequestRepository.findById(id)
@@ -43,18 +46,12 @@ public class CallRequestService {
         return orderMapper.callRequestToCallRequestDto(callRequest);
     }
 
-    public List<CallRequestDto> getAllCallRequests() {
-        List<CallRequest> calls = callRequestRepository.findAll();
-        List<CallRequestDto> dtos = new ArrayList<>();
-        for (CallRequest callRequest : calls) {
-            CallRequestDto callRequestDto = orderMapper.callRequestToCallRequestDto(callRequest);
-            dtos.add(callRequestDto);
-        }
-
-        return dtos;
+    public Page<CallRequestDto> getAllCallRequests(Pageable pageable) {
+        Page<CallRequest> calls = callRequestRepository.findAll(pageable);
+        return calls.map(orderMapper::callRequestToCallRequestDto);
     }
 
-    public List<CallRequestDto> getAllCallRequestsBy(String type) {
+    public Page<CallRequestDto> getAllCallRequestsBy(String type, Pageable pageable) {
         RequestType requestType;
         try {
             requestType = RequestType.valueOf(type.toUpperCase());
@@ -62,28 +59,18 @@ public class CallRequestService {
             throw new InvalidValueException("CallRequest", "type", type);
         }
 
-        List<CallRequest> calls = callRequestRepository.findAllByType(requestType);
-        List<CallRequestDto> dtos = new ArrayList<>();
-        for (CallRequest callRequest : calls) {
-            CallRequestDto callRequestDto = orderMapper.callRequestToCallRequestDto(callRequest);
-            dtos.add(callRequestDto);
-        }
+        Page<CallRequest> calls = callRequestRepository.findAllByType(requestType, pageable);
 
-        return dtos;
+        return calls.map(orderMapper::callRequestToCallRequestDto);
     }
 
-    public List<CallRequestDto> getAllCallRequestsBy(boolean active) {
-        List<CallRequest> calls = callRequestRepository.findAllByActive(active);
-        List<CallRequestDto> dtos = new ArrayList<>();
-        for (CallRequest callRequest : calls) {
-            CallRequestDto callRequestDto = orderMapper.callRequestToCallRequestDto(callRequest);
-            dtos.add(callRequestDto);
-        }
+    public Page<CallRequestDto> getAllCallRequestsBy(boolean active, Pageable pageable) {
+        Page<CallRequest> calls = callRequestRepository.findAllByActive(active, pageable);
 
-        return dtos;
+        return calls.map(orderMapper::callRequestToCallRequestDto);
     }
 
-    public List<CallRequestDto> getAllCallRequestsBy(String type, Boolean active) {
+    public Page<CallRequestDto> getAllCallRequestsBy(String type, Boolean active, Pageable pageable) {
         RequestType requestType;
         try {
             requestType = RequestType.valueOf(type.toUpperCase());
@@ -91,15 +78,9 @@ public class CallRequestService {
             throw new InvalidValueException("CallRequest", "type", type);
         }
 
-        List<CallRequest> calls = callRequestRepository.findAllByTypeAndActive(requestType, active);
+        Page<CallRequest> calls = callRequestRepository.findAllByTypeAndActive(requestType, active, pageable);
 
-        List<CallRequestDto> dtos = new ArrayList<>();
-        for (CallRequest callRequest : calls) {
-            CallRequestDto callRequestDto = orderMapper.callRequestToCallRequestDto(callRequest);
-            dtos.add(callRequestDto);
-        }
-
-        return dtos;
+        return calls.map(orderMapper::callRequestToCallRequestDto);
     }
 
     public List<CallRequestDto> getLatestCallRequests(String email) {
@@ -122,13 +103,12 @@ public class CallRequestService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User", email));
 
-        CallRequest callRequest = new CallRequest();
-        BeanUtils.copyProperties(callRequestDtoBasic, callRequest);
+        CallRequest callRequest = orderMapper.callRequestDtoBasicToCallRequest(callRequestDtoBasic);
         callRequest.setCustomer(user);
         callRequest.setCreatedAt(LocalDateTime.now());
 
         // To set the table in CallRequest, get the user's last order with status not COMPLETED and use its table.
-        Order lastActiveOrder = orderRepository.findTopByCustomerAndStatusNotAndStatusNotOrderByOrderTimeDesc(user, OrderStatus.COMPLETED, OrderStatus.CANCELLED);
+        Order lastActiveOrder = orderRepository.findTopByCustomerAndStatusNotInOrderByOrderTimeDesc(user, List.of(OrderStatus.COMPLETED, OrderStatus.CANCELLED));
         if (lastActiveOrder == null || lastActiveOrder.getTable() == null) {
             throw new NotFoundException("ActiveOrder");
         }

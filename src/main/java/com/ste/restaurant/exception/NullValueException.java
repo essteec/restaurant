@@ -12,11 +12,11 @@ public class NullValueException extends CustomException {
         );
     }
 
-//    not used
-//    public NullValueException(String fieldName) {
-//        super(fieldName + " cannot be null",
-//                fieldName.toUpperCase() + "_NULL",
-//                400,
-//                List.of("The " + fieldName + " field must not be null"));
-//    }
+    public NullValueException(String fieldName) {
+        super(fieldName + " cannot be null",
+                fieldName.toUpperCase() + "_NULL",
+                400,
+                "The " + fieldName + " field must not be null"
+        );
+    }
 } 

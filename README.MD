@@ -3,7 +3,7 @@
 <div align="center">
 
 ![Spring Boot](https://img.shields.io/badge/Spring-Boot-green)
-![Java](https://img.shields.io/badge/Java-21-orange)
+![Java](https://img.shields.io/badge/Java-17-orange)
 
 </div>
 
@@ -11,53 +11,68 @@
 
 ## 📝 Description
 
-A modern, minimal, automated restaurant management system built with Spring Boot, providing RESTful APIs to manage tables, food items, categories, menus, orders, and users. Designed for efficient order taking, real-time call requests, and robust backend management for restaurant operations.
+A modern, minimal, automated restaurant management system built with Spring Boot. It provides a comprehensive set of RESTful APIs to manage tables, food items, categories, menus, orders, and users. The system is designed for efficient order-taking, real-time call requests, and robust backend management for restaurant operations.
 
-> **Note:** A frontend project is planned but not yet available.
+> **Note:** A Frontend for this project: [Link will be available soon] 
 
 ---
 
 ## ✨ Features
 
 ### 🍕 Menu Management
-- Add, update, delete, and retrieve food items
-- Categorize food items
-- Set pricing and descriptions
-- **Planned:** Food item availability status
+- Add, update, delete, and retrieve food items and categories
+- Set pricing, descriptions, and images for food items
 
 ### 🛒 Order Processing
-- Place new orders with multiple items
+- Place new orders with multiple items for table or delivery
 - Track order status (PLACED, PREPARING, COMPLETED, CANCELLED, etc.)
 - Retrieve order history and details
-- **Planned:** Change table for an existing order
-- **Planned:** Add items to an existing order
+- Change table for an existing order
 
 ### ✋ Call Request Processing
-- Customers can call for waiter assistance with specific requests and notes
+- Customers can call for waiter assistance with specific requests (e.g., water, payment) and custom notes.
 
 ### 👤 User Management
-- Customer registration and profile management
-- Restaurant owner/partner registration
-- Delivery personnel management
+- Customer and employee (Waiter, Chef, Admin) registration and profile management
 - User authentication and authorization (JWT-based)
 
-### 📊 Additional Features
+### 📊 Restaurant Analytics
+- Admin dashboard with statistics on revenue, top-performing items, and busiest tables.
+
+### 🛠️ Additional Features
 - API documentation with Swagger/OpenAPI
-- **Planned:** Restaurant analytics dashboard
-- **Planned:** Global exception handling for consistent error responses
+- Global exception handling for consistent error responses
+- Backend infrastructure for a customer loyalty program (point system)
 - **Planned:** Real-time order tracking (WebSockets)
-- **Planned:** Customer loyalty program
 
 ---
 
 ## 🔧 Technology Stack
 
-| Technology   | Description                |
-|--------------|---------------------------|
-| Java 21      | Core programming language |
-| Spring Boot  | Application framework     |
-| Maven        | Build tool                |
-| Swagger      | API documentation         |
+| Technology      | Description                 |
+|-----------------|-----------------------------|
+| Java 17         | Core programming language   |
+| Spring Boot     | Application framework       |
+| Maven           | Build tool                  |
+| PostgreSQL      | Database                    |
+| Lombok          | Boilerplate code reduction  |
+| Swagger/OpenAPI | API documentation           |
+
+---
+
+## 🚀 Installation and Setup
+
+1.  Navigate to the `restaurant` directory.
+2.  Make sure you have Java 17 and Maven installed.
+3.  Set up a PostgreSQL database and configure the connection details in `src/main/resources/application.properties`.
+4.  Run the application using your IDE or with the command: `mvn spring-boot:run`
+
+---
+
+## 📖 API Documentation
+
+The API documentation is generated using Swagger/OpenAPI. Once the application is running, you can access the Swagger UI at:
+[http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
 
 ---
 
@@ -65,7 +80,7 @@ A modern, minimal, automated restaurant management system built with Spring Boot
 
 - Password encryption using BCrypt
 - JWT-based authentication
-- Role-based authorization (ADMIN, CUSTOMER, etc.)
+- Role-based authorization (ADMIN, CHEF, CUSTOMER, WAITER)
 
 ---
 
@@ -78,7 +93,7 @@ A modern, minimal, automated restaurant management system built with Spring Boot
 | FoodItem   | Inverse side of Many-to-Many with **Category** and **Menu**                                  |
 | Order      | Many-to-One to **User** (customer) <br> Many-to-One to **Address** <br> Many-to-One to **TableTop** <br> One-to-Many to **OrderItem** |
 | OrderItem  | Many-to-One to **Order** <br> Many-to-One to **FoodItem**                                    |
-| User       | One-to-Many to **Order** (mapped by customer) <br> One-to-Many to **Address** (via `user_address` join table) |
+| User       | One-to-Many to **Order** (mapped by customer) <br> One-to-Many to **Address** (unidirectional) |
 | TableTop   | Referenced by **Order** (as table)                                                           |
 | Address    | Referenced by **User** and **Order**                                                         |
 
@@ -86,15 +101,12 @@ A modern, minimal, automated restaurant management system built with Spring Boot
 
 ## 🚀 Future Enhancements
 
-- Restaurant analytics dashboard
-- Multi-language support
 - Real-time order tracking with WebSockets
-- Customer loyalty program
+- AI assistant to admin user for auto suggest some fields
+- Multi-language support with AI
 - Improved test coverage
-- Frontend client
 
 ---
-
 
 ## 📂 Data Seeding
 

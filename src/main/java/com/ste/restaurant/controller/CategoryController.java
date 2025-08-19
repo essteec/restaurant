@@ -2,23 +2,26 @@ package com.ste.restaurant.controller;
 
 import com.ste.restaurant.dto.CategoryDto;
 import com.ste.restaurant.dto.CategoryDtoBasic;
-import com.ste.restaurant.dto.StringsDto;
-import com.ste.restaurant.dto.WarningResponse;
+import com.ste.restaurant.dto.common.StringsDto;
+import com.ste.restaurant.dto.common.WarningResponse;
 import com.ste.restaurant.service.CategoryService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Set;
 
-@RequestMapping("/rest/api/categories/")
+@RequestMapping("/rest/api/categories")
 @RestController
 public class CategoryController {
 
-    @Autowired
-    private CategoryService categoryService;
+    private final CategoryService categoryService;
+
+    public CategoryController(CategoryService categoryService) {
+        this.categoryService = categoryService;
+    }
 
     // Category Management
     @PreAuthorize("hasRole('ADMIN')")
@@ -28,8 +31,9 @@ public class CategoryController {
     }
 
     @GetMapping
-    public List<CategoryDto> getAllCategories() {
-        return categoryService.listAllCategory();
+    public Page<CategoryDto> getAllCategories(
+            @PageableDefault(size = 24) Pageable pageable) {
+        return categoryService.listAllCategory(pageable);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -46,14 +50,14 @@ public class CategoryController {
 
     // relation with food item
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping(path = "/{categoryName}/food-items")
-    public WarningResponse<CategoryDto> addFoodItemsToCategory(@PathVariable String categoryName, @Valid @RequestBody StringsDto foodNames) {
-        return categoryService.addFoodItemsToCategory(categoryName, foodNames);
+    @PutMapping(path = "/{name}/food-items")
+    public WarningResponse<CategoryDto> addFoodItemsToCategory(@PathVariable String name, @Valid @RequestBody StringsDto foodNames) {
+        return categoryService.addFoodItemsToCategory(name, foodNames);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping(path = "/{categoryName}/food-items")
-    public WarningResponse<CategoryDto> deleteFoodItemFromCategory(@PathVariable String categoryName, @Valid @RequestBody StringsDto foodNames) {
-        return categoryService.removeFoodItemsFromCategory(categoryName, foodNames);
+    @DeleteMapping(path = "/{name}/food-items")
+    public WarningResponse<CategoryDto> deleteFoodItemFromCategory(@PathVariable String name, @Valid @RequestBody StringsDto foodNames) {
+        return categoryService.removeFoodItemsFromCategory(name, foodNames);
     }
 }

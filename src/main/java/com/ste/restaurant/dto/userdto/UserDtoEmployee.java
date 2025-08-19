@@ -1,15 +1,12 @@
 package com.ste.restaurant.dto.userdto;
 
-import com.ste.restaurant.dto.AddressDto;
 import com.ste.restaurant.entity.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-
+import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
@@ -19,7 +16,7 @@ public class UserDtoEmployee {
     private String lastName;
     private UserRole role;
     private String email;
-    private Date birthday;
+    private LocalDate birthday;
     private Integer loyaltyPoints;
     private BigDecimal salary;
 }

@@ -1,4 +1,4 @@
-package com.ste.restaurant.dto;
+package com.ste.restaurant.dto.common;
 
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;

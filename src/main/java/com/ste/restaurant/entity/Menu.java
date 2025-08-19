@@ -2,8 +2,9 @@ package com.ste.restaurant.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -14,17 +15,17 @@ public class Menu {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long menuId;
 
-    @Column(name = "menu_name", nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private String menuName;
 
     private String description;
 
     private boolean active = false;
 
-    @Column(name = "food_items")
+    @EqualsAndHashCode.Exclude
     @ManyToMany
     @JoinTable(name = "menu_food_item",
             joinColumns = @JoinColumn(name = "menu_id"),
             inverseJoinColumns = @JoinColumn(name = "food_item_id"))
-    private Set<FoodItem> foodItems;
+    private Set<FoodItem> foodItems = new HashSet<>();
 }

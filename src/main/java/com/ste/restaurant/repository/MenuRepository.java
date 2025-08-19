@@ -3,6 +3,8 @@ package com.ste.restaurant.repository;
 import com.ste.restaurant.entity.FoodItem;
 import com.ste.restaurant.entity.Menu;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,9 +19,11 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
 
     List<Menu> findAllByActive(boolean active);
 
-    void deleteByMenuName(String name);
-
     List<Menu> findAllByActiveAndFoodItemsIsContaining(boolean active, Set<FoodItem> foodItems);
 
     List<Menu> findAllByActiveAndFoodItemsContains(boolean b, Set<String> strings);
+
+    @Modifying
+    @Query("UPDATE Menu m SET m.active = false WHERE m.active = true")
+    void deactivateAll();
 }

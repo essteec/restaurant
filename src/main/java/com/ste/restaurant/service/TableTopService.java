@@ -1,25 +1,27 @@
 package com.ste.restaurant.service;
 
-import com.ste.restaurant.dto.StringDto;
+import com.ste.restaurant.dto.common.StringDto;
 import com.ste.restaurant.dto.TableTopDto;
 import com.ste.restaurant.entity.TableStatus;
 import com.ste.restaurant.entity.TableTop;
 import com.ste.restaurant.exception.*;
+import com.ste.restaurant.mapper.OrderMapper;
 import com.ste.restaurant.repository.TableTopRepository;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class TableTopService {
 
-    @Autowired
-    TableTopRepository tableRepository;
+    private final TableTopRepository tableRepository;
+    private final OrderMapper orderMapper;
+
+    public TableTopService(TableTopRepository tableTopRepository, OrderMapper orderMapper) {
+        this.tableRepository = tableTopRepository;
+        this.orderMapper = orderMapper;
+    }
 
     public TableTopDto saveTable(TableTopDto tableTopDto) {
         if (tableTopDto.getTableNumber() == null) {
@@ -30,31 +32,23 @@ public class TableTopService {
             throw new AlreadyExistsException("Table", tableTopDto.getTableNumber());
         }
         TableTop tableTop = new TableTop();
-        BeanUtils.copyProperties(tableTopDto, tableTop,
-                ServiceUtil.getNullPropertyNames(tableTopDto));
+
+        orderMapper.updateTableFromDto(tableTopDto, tableTop);
+
         TableTop savedTable = tableRepository.save(tableTop);
-        BeanUtils.copyProperties(savedTable, tableTopDto);
-        return tableTopDto;
+        return orderMapper.tableTopToTableTopDto(savedTable);
     }
 
     public List<TableTopDto> getAllTables() {
         List<TableTop> tableTops = tableRepository.findAll();
-        List<TableTopDto> tableTopDtos = new ArrayList<>();
-        for (TableTop tableTop : tableTops) {
-            TableTopDto tableTopDto = new TableTopDto();
-            BeanUtils.copyProperties(tableTop, tableTopDto);
-            tableTopDtos.add(tableTopDto);
-        }
-        return tableTopDtos;
+        return orderMapper.tableTopsToTableTopDtos(tableTops);
     }
 
     public TableTopDto getTableByName(String name) {
         TableTop table = tableRepository.findByTableNumber(name)
                 .orElseThrow(() -> new NotFoundException("Table", name));
 
-        TableTopDto tableTopDto = new TableTopDto();
-        BeanUtils.copyProperties(table, tableTopDto);
-        return tableTopDto;
+        return orderMapper.tableTopToTableTopDto(table);
     }
 
 
@@ -63,9 +57,7 @@ public class TableTopService {
                 .orElseThrow(() -> new NotFoundException("Table", name));
 
         tableRepository.delete(table);
-        TableTopDto tableTopDto = new TableTopDto();
-        BeanUtils.copyProperties(table, tableTopDto);
-        return tableTopDto;
+        return orderMapper.tableTopToTableTopDto(table);
     }
 
     public TableTopDto updateTable(String name, TableTopDto table) {
@@ -81,11 +73,12 @@ public class TableTopService {
         if (table.getCapacity() != null) {
             tableOld.setCapacity(table.getCapacity());
         }
+        if (tableOld.getTableStatus() != table.getTableStatus()) {
+            tableOld.setTableStatus(table.getTableStatus());
+        }
 
         TableTop savedTable = tableRepository.save(tableOld);
-        TableTopDto tableDto = new TableTopDto();
-        BeanUtils.copyProperties(savedTable, tableDto);
-        return tableDto;
+        return orderMapper.tableTopToTableTopDto(savedTable);
     }
 
     @Transactional
@@ -110,22 +103,13 @@ public class TableTopService {
         }
 
         table.setTableStatus(newStatus);
+
         tableRepository.save(table);
-        TableTopDto tableResponse = new TableTopDto();
-        BeanUtils.copyProperties(table, tableResponse);
-        return tableResponse;
+        return orderMapper.tableTopToTableTopDto(table);
     }
 
     public List<TableTopDto> getAvailableTables() {
-        List<TableTopDto> tableTopDtos = new ArrayList<>();
         List<TableTop> tableTops = tableRepository.findAllByTableStatus(TableStatus.AVAILABLE);
-
-        for (TableTop tableTop : tableTops) {
-            TableTopDto tableTopDto = new TableTopDto();
-            BeanUtils.copyProperties(tableTop, tableTopDto);
-            tableTopDtos.add(tableTopDto);
-        }
-
-        return tableTopDtos;
+        return orderMapper.tableTopsToTableTopDtos(tableTops);
     }
 }

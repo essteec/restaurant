@@ -1,6 +1,5 @@
 package com.ste.restaurant.dto;
 
-import com.ste.restaurant.entity.Category;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -26,4 +25,6 @@ public class FoodItemDto {
     @NotNull(message = "Price is required")
     @Positive(message = "Price must be positive")
     private BigDecimal price;
+
+    private Set<CategoryDtoBasic> categories;
 }

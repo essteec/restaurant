@@ -3,7 +3,7 @@ package com.ste.restaurant.entity;
 public enum RequestType {
     WATER,
     PAYMENT,
-    ASSISTANT,
+    ASSISTANCE,
     NEED,
     PACK
 }

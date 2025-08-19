@@ -2,15 +2,21 @@ package com.ste.restaurant.service;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyDescriptor;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ServiceUtil {
 
@@ -61,11 +67,30 @@ public class ServiceUtil {
             g2d.drawImage(croppedImage, 0, 0, size, size, null);
             g2d.dispose();
 
-            ImageIO.write(resizedImage, "jpg", new java.io.File(filePath));
+            ImageIO.write(resizedImage, getFileExtension(imageFile.getOriginalFilename()), new java.io.File(filePath));
             return true;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public static <T> Page<T> createPage(List<T> list, Pageable pageable) {
+        if (list == null || list.isEmpty()) {
+            return new PageImpl<>(Collections.emptyList(), pageable, 0);
+        }
+
+        int total = list.size();
+        long offset = pageable.getOffset();
+
+        if (offset >= total) {
+            return new PageImpl<>(Collections.emptyList(), pageable, total);
+        }
+        List<T> pagedContent = list.stream()
+                .skip(offset)
+                .limit(pageable.getPageSize())
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(pagedContent, pageable, total);
     }
 }

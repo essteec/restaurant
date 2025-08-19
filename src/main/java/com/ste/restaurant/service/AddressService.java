@@ -3,27 +3,34 @@ package com.ste.restaurant.service;
 
 import com.ste.restaurant.dto.AddressDto;
 import com.ste.restaurant.entity.Address;
+import com.ste.restaurant.entity.Order;
 import com.ste.restaurant.entity.User;
 import com.ste.restaurant.exception.NotFoundException;
 import com.ste.restaurant.exception.NullValueException;
+import com.ste.restaurant.mapper.OrderMapper;
 import com.ste.restaurant.repository.AddressRepository;
+import com.ste.restaurant.repository.OrderRepository;
 import com.ste.restaurant.repository.UserRepository;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class AddressService {
 
-    @Autowired
-    AddressRepository addressRepository;
+    private final AddressRepository addressRepository;
+    private final UserRepository userRepository;
+    private final OrderMapper orderMapper;
+    private final OrderRepository orderRepository;
 
-    @Autowired
-    UserRepository userRepository;
+    public AddressService(AddressRepository addressRepository, UserRepository userRepository,
+                          OrderRepository orderRepository, OrderMapper orderMapper) {
+        this.addressRepository = addressRepository;
+        this.userRepository = userRepository;
+        this.orderMapper = orderMapper;
+        this.orderRepository = orderRepository;
+    }
 
     // admin
     public List<AddressDto> getAddressesOfUser(Long userId){
@@ -41,15 +48,18 @@ public class AddressService {
                 .orElseThrow(() -> new NotFoundException("Address", addressId));
 
         if (!user.getAddresses().contains(address)) {
-            throw new NotFoundException("Address", addressId);  // this address not belong to them
+            throw new NotFoundException("Address", addressId);
         }
+
+        List<Order> ordersUsingAddress = orderRepository.findByAddress(address);
+        ordersUsingAddress.forEach(order -> order.setAddress(null));
+        orderRepository.saveAll(ordersUsingAddress);
+
+        AddressDto addressDto = orderMapper.addressToAddressDto(address);
 
         user.getAddresses().remove(address);
         userRepository.save(user);
 
-        AddressDto addressDto = new AddressDto();
-        BeanUtils.copyProperties(address, addressDto);
-        addressRepository.delete(address);
         return addressDto;
     }
 
@@ -58,31 +68,22 @@ public class AddressService {
     public AddressDto saveAddress(AddressDto addressDto, String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User", email));
-        Address address = new Address();
-        BeanUtils.copyProperties(addressDto, address);
+        Address address = orderMapper.addressDtoToAddress(addressDto);
 
         Address savedAddress = addressRepository.save(address);
 
         user.getAddresses().add(savedAddress);
         userRepository.save(user);
 
-        AddressDto responseDto = new AddressDto();
-        BeanUtils.copyProperties(savedAddress, responseDto);
-        return responseDto;
+        return orderMapper.addressToAddressDto(savedAddress);
     }
 
     public List<AddressDto> getAddresses(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User", email));
 
-        List<AddressDto> addressDtos = new ArrayList<>();
         List<Address> addresses = user.getAddresses();
-        for (Address address : addresses) {
-            AddressDto addressDto = new AddressDto();
-            BeanUtils.copyProperties(address, addressDto);
-            addressDtos.add(addressDto);
-        }
-        return addressDtos;
+        return orderMapper.addressesToAddressDtos(addresses);
     }
 
     @Transactional
@@ -94,16 +95,13 @@ public class AddressService {
                 .orElseThrow(() -> new NotFoundException("Address", id));
 
         if (!user.getAddresses().contains(address)) {
-            throw new NotFoundException("Address", id);  // this address not belong to them
+            throw new NotFoundException("Address", id);  // this address doesn't belong to them
         }
 
         user.getAddresses().remove(address);
-        addressRepository.delete(address);
-        userRepository.save(user);
 
-        AddressDto addressDto = new AddressDto();
-        BeanUtils.copyProperties(address, addressDto);
-        return addressDto;
+        userRepository.save(user);
+        return orderMapper.addressToAddressDto(address);
     }
 
     @Transactional
@@ -120,16 +118,11 @@ public class AddressService {
                 .orElseThrow(() -> new NotFoundException("Address", addressId));
 
         if (!user.getAddresses().contains(address)) {
-            throw new NotFoundException("Address", addressId);  // this address not belong to them
+            throw new NotFoundException("Address", addressId);  // this address doesn't belong to them
         }
-
-        BeanUtils.copyProperties(addressDto, address,
-                ServiceUtil.getNullPropertyNames(addressDto));
+        orderMapper.updateAddressFromDto(addressDto, address);
 
         Address savedAddress = addressRepository.save(address);
-
-        AddressDto addressResponse = new AddressDto();
-        BeanUtils.copyProperties(savedAddress, addressResponse);
-        return addressResponse;
+        return orderMapper.addressToAddressDto(savedAddress);
     }
 }

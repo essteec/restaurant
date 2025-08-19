@@ -1,5 +1,6 @@
 /src/main/resources/env.properties
 /src/main/resources/static
+/uploads/
 
 HELP.md
 target/

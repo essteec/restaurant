@@ -1,7 +1,6 @@
 package com.ste.restaurant.configuration;
 
 import com.ste.restaurant.security.JwtAuthenticationFilter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -23,25 +22,30 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private CustomUserDetailsService customUserDetailsService;
+    private final CustomUserDetailsService customUserDetailsService;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    public SecurityConfig(CustomUserDetailsService customUserDetailsService,
+                          JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.customUserDetailsService = customUserDetailsService;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf().disable()
                 .authorizeHttpRequests(auth -> auth // "/rest/api/orders/**"
+                        .requestMatchers("/actuator/**").permitAll()  // delete in prod
                         .requestMatchers(
                                 "/rest/api/auth/**",         // Authentication endpoints (login, register, etc.)
                                 "/v3/api-docs/**",           // Swagger/OpenAPI docs
                                 "/swagger-ui/**",
-                                "/swagger-ui.html"
+                                "/swagger-ui.html",
+                                "/images/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/rest/api/tables/available").permitAll()  // Public: get available tables
                         .requestMatchers(HttpMethod.GET, "/rest/api/menus/active").permitAll()      // Public: get active menus
-                        .requestMatchers(HttpMethod.GET, "/rest/api/categories/").permitAll()       // Public get all categories
+                        .requestMatchers(HttpMethod.GET, "/rest/api/categories").permitAll()       // Public get all categories
                         .requestMatchers(HttpMethod.GET, "/rest/api/food-items/*/categories").permitAll()
                         .requestMatchers(HttpMethod.GET, "/rest/api/users/*/addresses/**").hasRole("ADMIN")
 

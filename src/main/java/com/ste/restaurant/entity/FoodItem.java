@@ -15,10 +15,9 @@ import java.util.Set;
 public class FoodItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "food_id")
     private Long foodId;
 
-    @Column(name = "food_name", nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private String foodName;
 
     private String image;
@@ -26,4 +25,9 @@ public class FoodItem {
     private String description;
 
     private BigDecimal price;
+
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @ManyToMany(mappedBy = "foodItems")
+    private Set<Category> categories = new HashSet<>();
 }

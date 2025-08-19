@@ -1,78 +1,62 @@
 package com.ste.restaurant.service;
 
-import com.ste.restaurant.dto.BigDecimalDto;
-import com.ste.restaurant.dto.StringDto;
-import com.ste.restaurant.dto.userdto.UserDto;
-import com.ste.restaurant.dto.userdto.UserDtoCustomer;
-import com.ste.restaurant.dto.userdto.UserDtoEmployee;
-import com.ste.restaurant.dto.userdto.UserDtoIO;
+import com.ste.restaurant.dto.common.BigDecimalDto;
+import com.ste.restaurant.dto.common.StringDto;
+import com.ste.restaurant.dto.userdto.*;
 import com.ste.restaurant.entity.*;
 import com.ste.restaurant.exception.*;
 import com.ste.restaurant.mapper.OrderMapper;
 import com.ste.restaurant.repository.AddressRepository;
-import com.ste.restaurant.repository.OrderItemRepository;
 import com.ste.restaurant.repository.OrderRepository;
 import com.ste.restaurant.repository.UserRepository;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @Service
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
+    private final AddressRepository addressRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final OrderMapper orderMapper;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    public UserService(UserRepository userRepository, OrderRepository orderRepository,
+                       AddressRepository addressRepository, PasswordEncoder passwordEncoder, OrderMapper orderMapper) {
+        this.userRepository = userRepository;
+        this.orderRepository = orderRepository;
+        this.addressRepository = addressRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.orderMapper = orderMapper;
+    }
 
-    @Autowired
-    private OrderRepository orderRepository;
-
-    @Autowired
-    private AddressRepository addressRepository;
-
-    @Autowired
-    private OrderItemRepository orderItemRepository;
-    @Autowired
-    private OrderMapper orderMapper;
-
+    @Transactional
     public UserDto saveUser(UserDtoIO userDtoIO) {
         Optional<User> existUser = userRepository.findByEmail(userDtoIO.getEmail());
         if (existUser.isPresent()) {
             throw new AlreadyExistsException("User", userDtoIO.getEmail());
         }
-        UserDto userDtoResponse = new UserDto();
-        User user = new User();
 
-        BeanUtils.copyProperties(userDtoIO, user);
-        BeanUtils.copyProperties(userDtoIO, userDtoResponse);
+        User user = orderMapper.userDtoIOToUser(userDtoIO);
 
         user.setPassword(passwordEncoder.encode(userDtoIO.getPassword()));
 
-        userRepository.save(user);
-        return userDtoResponse;
+        User savedUser = userRepository.save(user);
+        return orderMapper.userToUserDto(savedUser);
     }
 
-    public List<UserDto> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        List<UserDto> userDtos = new ArrayList<>();
-
-        for (User user : users) {
-            UserDto userDto = new UserDto();
-            BeanUtils.copyProperties(user, userDto);
-            userDtos.add(userDto);
-        }
-        return userDtos;
+    public Page<UserDto> getAllUsers(Pageable pageable) {
+        Page<User> users = userRepository.findAll(pageable);
+        return users.map(orderMapper::userToUserDto);
     }
 
-    public List<UserDto> getAllUsersByRole(String role) {
+    public Page<UserDto> getAllUsersByRole(String role, Pageable pageable) {
         UserRole userRole;
         try {
             userRole = UserRole.valueOf(role.toUpperCase());
@@ -81,69 +65,52 @@ public class UserService {
             throw new InvalidValueException("User", "role", role);
         }
 
-        List<User> users = userRepository.findAllByRole(userRole);
-        List<UserDto> userDtos = new ArrayList<>();
-
-        for (User user : users) {
-            UserDto userDto = new UserDto();
-            BeanUtils.copyProperties(user, userDto);
-            userDtos.add(userDto);
-        }
-        return userDtos;
+        Page<User> users = userRepository.findAllByRole(userRole, pageable);
+        return users.map(orderMapper::userToUserDto);
     }
 
     public UserDto getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User", id));
-        UserDto userDtoResponse = new UserDto();
-        BeanUtils.copyProperties(user, userDtoResponse);
-        return userDtoResponse;
+        return orderMapper.userToUserDto(user);
     }
 
+    @Transactional
     public UserDto deleteUserById(Long id) {
         User userDel = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User", id));
 
-        List<Order> orders = orderRepository.findByCustomer(userDel);
-        for (Order order : orders) {
-            List<OrderItem> orderItems = new ArrayList<>(order.getOrderItems());
-            orderItemRepository.deleteAll(orderItems);
-            orderRepository.delete(order);
-        }
+        UserDto userDto = orderMapper.userToUserDto(userDel);
 
-        List<Address> addresses = new ArrayList<>(userDel.getAddresses());
-        addressRepository.deleteAll(addresses);
+        orderRepository.updateCustomerAndAddressToNull(userDel);
+
+        if (userDel.getAddresses() != null) addressRepository.deleteAll(userDel.getAddresses());
 
         userRepository.delete(userDel);
-        
-        UserDto userDtoResponse = new UserDto();
-        BeanUtils.copyProperties(userDel, userDtoResponse);
-        return userDtoResponse;
+
+        return userDto;
     }
 
-    public UserDto updateUserById(Long id, UserDtoIO userDtoIO) {
-        userDtoIO.setPassword(null);
+    @Transactional
+    public UserDto updateUserById(Long id, UserDtoEmployee userDto) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User", id));
 
-        if (userDtoIO.getEmail() != null) {
-            if (userRepository.findByEmail(userDtoIO.getEmail()).isPresent()) {
-                throw new AlreadyExistsException("User", userDtoIO.getEmail());
+        if (userDto.getEmail() != null && !userDto.getEmail().equals(user.getEmail())) {
+            if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
+                throw new AlreadyExistsException("User", userDto.getEmail());
             }
         }
-        BeanUtils.copyProperties(userDtoIO, user,
-                ServiceUtil.getNullPropertyNames(userDtoIO));
+        orderMapper.updateUserFromDtoEmployee(userDto, user);
 
         User savedUser = userRepository.save(user);
-
-        UserDto userDtoResponse = new UserDto();
-        BeanUtils.copyProperties(savedUser, userDtoResponse);
-        return userDtoResponse;
+        return orderMapper.userToUserDto(savedUser);
     }
 
+    @Transactional
     public UserDto updateUserRoleById(Long id, StringDto roleDto) {
         if (roleDto.getName() == null) {
-            throw new NullValueException("User", "email");
+            throw new NullValueException("User", "role");
         }
         String role = roleDto.getName();
 
@@ -160,6 +127,11 @@ public class UserService {
         if (user.getRole().equals(newRole)) {
             throw new AlreadyHasException("User", "role", role);
         }
+
+        if ((user.getRole() == UserRole.CHEF || user.getRole() == UserRole.WAITER) &&
+                (newRole != UserRole.CHEF && newRole != UserRole.WAITER)) {
+            user.setSalary(null);
+        }
         user.setRole(newRole);
         userRepository.save(user);
         return orderMapper.userToUserDto(user);
@@ -171,6 +143,7 @@ public class UserService {
         return orderMapper.userToUserDtoCustomer(user);
     }
 
+    @Transactional
     public UserDtoCustomer deleteCustomerByEmail(String email) {
         User userDel = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User", email));
@@ -180,24 +153,25 @@ public class UserService {
         return userDtoResponse;
     }
 
+    @Transactional
     public UserDtoCustomer updateCustomerByEmail(String email, UserDtoIO userDto) {
         userDto.setPassword(null);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User", email));
 
-        if (userDto.getEmail() != null) {
+        if (userDto.getEmail() != null && !userDto.getEmail().equals(user.getEmail())) {
             if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
                 throw new AlreadyExistsException("User", userDto.getEmail());
             }
         }
-        BeanUtils.copyProperties(userDto, user,
-                ServiceUtil.getNullPropertyNames(userDto));
+
+        orderMapper.updateUserFromDtoIO(userDto, user);
 
         User savedUser = userRepository.save(user);
-
         return orderMapper.userToUserDtoCustomer(savedUser);
     }
 
+    @Transactional
     public UserDto updateEmployeeSalaryById(Long id, BigDecimalDto salaryDto) {
         if (salaryDto.getDecimal() == null) {
             throw new NullValueException("Employee", "salary");
@@ -220,5 +194,26 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("User", email));
         
         return orderMapper.userToUserDtoEmployee(user);
+    }
+
+    @Transactional
+    public UserDtoCustomer changePassword(String name, PasswordChangeDto passwordData) {
+        User user = userRepository.findByEmail(name)
+                .orElseThrow(() -> new NotFoundException("User", name));
+
+        String currentPassword = passwordData.getPassword();
+        String newPassword = passwordData.getNewPassword();
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new InvalidValueException("User", "password", "Invalid password");
+        }
+
+        if (currentPassword.equals(newPassword)) {
+            throw new InvalidValueException("User", "password", "Same password with previous one");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        User savedUser = userRepository.save(user);
+        return orderMapper.userToUserDtoCustomer(savedUser);
     }
 }

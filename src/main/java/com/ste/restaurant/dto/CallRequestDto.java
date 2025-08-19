@@ -2,7 +2,6 @@ package com.ste.restaurant.dto;
 
 import com.ste.restaurant.dto.userdto.UserDto;
 import com.ste.restaurant.entity.RequestType;
-import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,9 +19,10 @@ public class CallRequestDto {
 
     private String message;
 
+    private boolean active;
+
     private TableTopDto table;
 
-    @ManyToOne
     private UserDto customer;
 
     private LocalDateTime createdAt;

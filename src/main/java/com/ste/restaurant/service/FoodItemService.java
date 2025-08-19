@@ -8,13 +8,15 @@ import com.ste.restaurant.exception.AlreadyExistsException;
 import com.ste.restaurant.exception.ImageProcessingException;
 import com.ste.restaurant.exception.NotFoundException;
 import com.ste.restaurant.exception.NullValueException;
-import com.ste.restaurant.repository.CategoryRepository;
+import com.ste.restaurant.mapper.OrderMapper;
 import com.ste.restaurant.repository.FoodItemRepository;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -22,11 +24,16 @@ import java.util.*;
 @Service
 public class FoodItemService {
 
-    @Autowired
-    private FoodItemRepository foodItemRepository;
+    private final FoodItemRepository foodItemRepository;
+    private final OrderMapper orderMapper;
+    private final String uploadDir;
 
-    @Autowired
-    private CategoryRepository categoryRepository;
+    public FoodItemService(FoodItemRepository foodItemRepo, OrderMapper orderMapper,
+                           @Value("${app.image.upload-dir}") String uploadDir) {
+        this.foodItemRepository = foodItemRepo;
+        this.orderMapper = orderMapper;
+        this.uploadDir = uploadDir;
+    }
 
     public FoodItemDto saveFoodItem(FoodItemDto foodItem) {
         if (foodItem.getFoodName() == null) {
@@ -35,39 +42,28 @@ public class FoodItemService {
         if (foodItemRepository.existsFoodItemByFoodName(foodItem.getFoodName())) {
             throw new AlreadyExistsException("Food", foodItem.getFoodName());
         }
-        FoodItem foodItemSave = new FoodItem();
-        BeanUtils.copyProperties(foodItem, foodItemSave);
-        foodItemRepository.save(foodItemSave);
-        return foodItem;
+
+        FoodItem savedFood = foodItemRepository.save(orderMapper.foodItemDtoToFoodItem(foodItem));
+        return orderMapper.foodItemToFoodItemDto(savedFood);
     }
 
-    public List<FoodItemDto> getAllFoodItems() {
-        List<FoodItem> foodItems = foodItemRepository.findAll();
-        List<FoodItemDto> foodItemDtos = new ArrayList<>();
-        for (FoodItem foodItem : foodItems) {
-            FoodItemDto foodItemDto = new FoodItemDto();
-            BeanUtils.copyProperties(foodItem, foodItemDto);
-            foodItemDtos.add(foodItemDto);
-        }
-        return foodItemDtos;
+    public Page<FoodItemDto> getAllFoodItems(Pageable pageable) {
+        Page<FoodItem> foodItems = foodItemRepository.findAll(pageable);
+        return foodItems.map(orderMapper::foodItemToFoodItemDto);
     }
 
     public FoodItemDto getFoodItemByName(String name) {
         FoodItem foodItem = foodItemRepository.findByFoodName(name)
                 .orElseThrow(() -> new NotFoundException("Food", name));
 
-        FoodItemDto foodItemDto = new FoodItemDto();
-        BeanUtils.copyProperties(foodItem, foodItemDto);
-        return foodItemDto;
+        return orderMapper.foodItemToFoodItemDto(foodItem);
     }
 
     public FoodItemDto deleteFoodItemByName(String name) {
         FoodItem food = foodItemRepository.findByFoodName(name)
                         .orElseThrow(() -> new NotFoundException("Food", name));
         foodItemRepository.delete(food);
-        FoodItemDto foodItemDto = new FoodItemDto();
-        BeanUtils.copyProperties(food, foodItemDto);
-        return foodItemDto;
+        return orderMapper.foodItemToFoodItemDto(food);
     }
 
     public FoodItemDto updateFoodItemByName(String name, FoodItemDto foodItem) {
@@ -79,94 +75,81 @@ public class FoodItemService {
                 throw new AlreadyExistsException("Food", foodItem.getFoodName());
             }
         }
-        BeanUtils.copyProperties(foodItem, foodItemOld,
-                ServiceUtil.getNullPropertyNames(foodItem));
+        orderMapper.updateFoodItemFromDto(foodItem, foodItemOld);
 
         FoodItem savedFoodItem = foodItemRepository.save(foodItemOld);
 
-        FoodItemDto foodItemResponse = new FoodItemDto();
-        BeanUtils.copyProperties(savedFoodItem, foodItemResponse);
-        return foodItemResponse;
+        return orderMapper.foodItemToFoodItemDto(savedFoodItem);
     }
 
-    public List<CategoryDtoBasic> getCategories(String name) {
+    public Set<CategoryDtoBasic> getCategories(String name) {
         Optional<FoodItem> foodItemOpt = foodItemRepository.findByFoodName(name);
         if (foodItemOpt.isEmpty()) {
-            return Collections.emptyList();
+            return Collections.emptySet();
         }
         FoodItem foodItem = foodItemOpt.get();
 
-        List<Category> categories = categoryRepository.getCategoriesByFoodItems(Set.of(foodItem));
-        List<CategoryDtoBasic> categoryDtos = new ArrayList<>();
-        for (Category category : categories) {
-            CategoryDtoBasic categoryDto = new CategoryDtoBasic();
-            BeanUtils.copyProperties(category, categoryDto);
-            categoryDtos.add(categoryDto);
-        }
-        return categoryDtos;
+        return orderMapper.categoriesToCategoryDtoBasics(foodItem.getCategories());
     }
 
     // process image
     public FoodItemDto addImageToFood(String name, MultipartFile imageFile) {
+        String originalFilename = imageFile.getOriginalFilename();
+        if (originalFilename == null || originalFilename.isEmpty()) {
+            throw new NullValueException("Image", "filename");
+        }
+
         FoodItem food = foodItemRepository.findByFoodName(name)
                 .orElseThrow(() -> new NotFoundException("Food", name));
         String oldImage = food.getImage();
 
         try {
+            String extension = ServiceUtil.getFileExtension(originalFilename);
+            if (extension.isEmpty()) throw new NullValueException("Image", "extension");
             String fileName = name.replaceAll("\\s+", "-") + LocalDateTime.now().format(DateTimeFormatter.ofPattern("_yyyy-MM-dd_HH-mm-ss.")) +
-                    ServiceUtil.getFileExtension(imageFile.getOriginalFilename());
-            String dir = "src/main/resources/static/images/";
-            java.io.File dirFile = new java.io.File(dir);
+                    extension;
+            java.io.File dirFile = new java.io.File(uploadDir);
             if (!dirFile.exists()) {
-                dirFile.mkdirs();
+                if (!dirFile.mkdirs()) {
+                    throw new ImageProcessingException("Image folder not created!");
+                }
             }
-            String filePath = dir + fileName;
+            String filePath = uploadDir + fileName;
 
             if (!ServiceUtil.cropAndResizeToSquare(imageFile, filePath, 600)){
                 throw new ImageProcessingException("Image crop and resizing failed");
             }
 
             // delete old image
-            if (oldImage != null && !oldImage.equals(imageFile.getOriginalFilename())) {
+            if (oldImage != null) {
                 deleteImageFile(food);
             }
 
             food.setImage(fileName);
 
             FoodItem savedFood = foodItemRepository.save(food);
-
-            // update food item
-            FoodItemDto foodDto = new FoodItemDto();
-            BeanUtils.copyProperties(savedFood, foodDto);
-
-            return foodDto;
+            return orderMapper.foodItemToFoodItemDto(savedFood);
 
         } catch (Exception e) {
             throw new ImageProcessingException(e.getMessage());
         }
     }
 
-    public boolean deleteImageFile(String name) {
+    public Boolean deleteImageFile(String name) {
         FoodItem food = foodItemRepository.findByFoodName(name)
                 .orElseThrow(() -> new NotFoundException("Food", name));
 
         return deleteImageFile(food);
     }
 
-    public boolean deleteImageFile(FoodItem food) {
+    public Boolean deleteImageFile(FoodItem food) {
         String oldImage = food.getImage();
         if (oldImage != null) {
-            java.io.File oldImageFile = new java.io.File(
-                    "src/main/resources/static/images/" + oldImage);
-            if (oldImageFile.exists()) {
-                if (oldImageFile.delete()) {  // after delete operations
-                    food.setImage(null);
-                    foodItemRepository.save(food);
-                    return true;
-                }
-                else {  // failed to delete
-                    return false;
-                }
+            File oldImageFile = new File(uploadDir + oldImage);
+            if (oldImageFile.exists() && oldImageFile.delete()) {  // after delete operations
+                food.setImage(null);
+                foodItemRepository.save(food);
+                return true;
             }
         }
         return false;

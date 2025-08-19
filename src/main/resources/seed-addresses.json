@@ -31,5 +31,104 @@
     "street": "Deniz",
     "apartment": "Villa 5",
     "description": "By the sea"
+  },
+  {
+    "name": "Grandparents",
+    "country": "Turkey",
+    "city": "Ankara",
+    "province": "Central Anatolia",
+    "subprovince": "Cankaya",
+    "district": "Bahcelievler",
+    "street": "Ataturk",
+    "apartment": "Flat 3B",
+    "description": "Close to the market"
+  },
+  {
+    "name": "Friend's Place",
+    "country": "Turkey",
+    "city": "Bursa",
+    "province": "Marmara",
+    "subprovince": "Osmangazi",
+    "district": "Altıparmak",
+    "street": "Gökçe",
+    "apartment": "Apartment 4",
+    "description": "Near the university"
+  },
+  {
+    "name": "Cottage",
+    "country": "Turkey",
+    "city": "Trabzon",
+    "province": "Black Sea",
+    "subprovince": "Ortahisar",
+    "district": "Akçaabat",
+    "street": "Yali",
+    "apartment": "Cottage 2",
+    "description": "In the mountains"
+  },
+  {
+    "name": "Beach House",
+    "country": "Turkey",
+    "city": "Antalya",
+    "province": "Mediterranean",
+    "subprovince": "Konyaalti",
+    "district": "Liman",
+    "street": "Atatürk",
+    "apartment": "Beachfront",
+    "description": "On the coast"
+  },
+  {
+    "name": "City Center",
+    "country": "Turkey",
+    "city": "Adana",
+    "province": "Mediterranean",
+    "subprovince": "Seyhan",
+    "district": "Reşatbey",
+    "street": "Ziyapaşa",
+    "apartment": "Flat 7",
+    "description": "In the heart of the city"
+  },
+  {
+    "name": "Countryside",
+    "country": "Turkey",
+    "city": "Kayseri",
+    "province": "Central Anatolia",
+    "subprovince": "Melikgazi",
+    "district": "Kocasinan",    
+    "street": "Erciyes",
+    "apartment": "Farmhouse",
+    "description": "Surrounded by fields"
+  },
+  {
+    "name": "Mountain Lodge",
+    "country": "Turkey",
+    "city": "Erzurum",
+    "province": "Eastern Anatolia",
+    "subprovince": "Yakutiye",
+    "district": "Palandöken",
+    "street": "Kars",
+    "apartment": "Lodge 1",
+    "description": "Near the ski resort"
+  },
+  {
+    "name": "Historical Site",
+    "country": "Turkey",
+    "city": "Gaziantep",
+    "province": "Southeastern Anatolia",
+    "subprovince": "Şahinbey",
+    "district": "Emek",
+    "street": "Zeytin",
+    "apartment": "Heritage House",
+    "description": "Close to the castle"
+  },
+  {
+    "name": "Cultural Hub",
+    "country": "Turkey",
+    "city": "Konya",
+    "province": "Central Anatolia",
+    "subprovince": "Selçuklu",
+    "district": "Meram",
+    "street": "Mevlana",
+    "apartment": "Cultural Center",
+    "description": "Near the museum"
   }
 ]

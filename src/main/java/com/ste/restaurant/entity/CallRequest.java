@@ -2,6 +2,7 @@ package com.ste.restaurant.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
 
@@ -10,7 +11,6 @@ import java.time.LocalDateTime;
 @Table(name = "call_requests")
 public class CallRequest {
     @Id
-    @Column(name = "call_request_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long callRequestId;
 
@@ -19,17 +19,17 @@ public class CallRequest {
 
     private String message;
 
-    @JoinColumn(name = "active")
     private boolean active = true;
 
+    @EqualsAndHashCode.Exclude
     @ManyToOne
     @JoinColumn(name = "table_id")
     private TableTop table;
 
+    @EqualsAndHashCode.Exclude
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User customer;
 
-    @Column(name = "created_at")
     private LocalDateTime createdAt;
 }

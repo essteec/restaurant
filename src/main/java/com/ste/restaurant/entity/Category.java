@@ -14,17 +14,17 @@ import lombok.ToString;
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "category_id")
     private Long categoryId;
 
-    @Column(name = "category_name", nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private String categoryName;
 
-    @Column(name = "food_items")
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToMany
     @JoinTable(name = "category_food_item",
             joinColumns = @JoinColumn(name = "category_id"),
             inverseJoinColumns = @JoinColumn(name = "food_item_id"))
-    private Set<FoodItem> foodItems;
+    private Set<FoodItem> foodItems = new HashSet<>();
 }
 

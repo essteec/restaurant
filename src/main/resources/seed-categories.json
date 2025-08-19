@@ -1,9 +1,11 @@
 [
-  { "categoryName": "Appetizers", "foodItems": ["French Fries"] },
-  { "categoryName": "Main Course", "foodItems": ["Cheeseburger", "Grilled Chicken"] },
-  { "categoryName": "Desserts", "foodItems": ["Chocolate Cake"] },
-  { "categoryName": "Beverages", "foodItems": ["Cola"] },
-  { "categoryName": "Salads", "foodItems": ["Caesar Salad"] },
-  { "categoryName": "Soups", "foodItems": ["Lentil Soup"] },
-  { "categoryName": "Grill", "foodItems": ["Grilled Chicken"] }
+  { "categoryName": "Appetizers", "foodItems": ["Lentil Soup", "French Fries", "Chicken Wings", "Mushroom Soup", "Falafel", "Spring Rolls"] },
+  { "categoryName": "Main Course", "foodItems": ["Cheeseburger", "Grilled Chicken", "Fish & Chips", "Veggie Burger", "Steak"] },
+  { "categoryName": "Desserts", "foodItems": ["Chocolate Cake", "Ice Cream", "Fruit Tart", "Apple Pie", "Fruit Salad", "Tiramisu"] },
+  { "categoryName": "Breakfast", "foodItems": ["Pancakes", "Omelette", "Eggs Benedict"] },
+  { "categoryName": "Salads", "foodItems": ["Caesar Salad", "Quinoa Salad", "Greek Salad"] },
+  { "categoryName": "Soups", "foodItems": ["Lentil Soup", "Mushroom Soup", "Tomato Soup"] },
+  { "categoryName": "Grill", "foodItems": ["Grilled Chicken", "Chicken Wings", "Steak"] },
+  { "categoryName": "Vegetarian", "foodItems": ["Vegetable Stir Fry", "Quinoa Salad", "Greek Salad", "Falafel", "Fruit Salad", "Spring Rolls"] },
+  { "categoryName": "Beverages", "foodItems": ["Cola", "Orange Juice", "Coffee", "Soda Water", "Lemonade"] }
 ]

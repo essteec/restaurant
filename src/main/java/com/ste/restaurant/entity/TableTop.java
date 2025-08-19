@@ -9,10 +9,9 @@ import lombok.Data;
 public class TableTop {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "table_id")
     private Long tableId;
 
-    @Column(name = "table_number", nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private String tableNumber;
 
     @Column(nullable = false)

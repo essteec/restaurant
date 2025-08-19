@@ -1,4 +1,4 @@
-package com.ste.restaurant.dto;
+package com.ste.restaurant.dto.common;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
