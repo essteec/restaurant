@@ -2,8 +2,11 @@ package com.ste.restaurant.controller;
 
 import com.ste.restaurant.dto.common.StringDto;
 import com.ste.restaurant.dto.TableTopDto;
+import com.ste.restaurant.dto.TableTopDtoQr;
 import com.ste.restaurant.service.TableTopService;
 import jakarta.validation.Valid;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,8 +46,28 @@ public class TableTopController {
     public TableTopDto updateTable(@PathVariable String name, @Valid @RequestBody TableTopDto tableTopDto) {
         return tableTopService.updateTable(name, tableTopDto);
     }
+    
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping(path = "/qr-codes")
+    public ResponseEntity<Void> resetAllQrCodes() {  // return response ok
+        tableTopService.createQrForTables();
+        return ResponseEntity.ok().build();
+    }
+    
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping(path = "/qr-codes")
+    public ResponseEntity<Void> deleteAllQrCodes() {
+        tableTopService.deleteAllQrCodes();
+        return ResponseEntity.ok().build();
+    }
 
     // admin and waiter
+    @PreAuthorize("hasAnyRole('ADMIN', 'WAITER')")
+    @GetMapping(path = "/qr-codes")
+    public List<TableTopDtoQr> getAllQrCodes() {
+        return tableTopService.getAllQrCodes(); 
+    }
+
     @PreAuthorize("hasAnyRole('ADMIN', 'WAITER')")
     @GetMapping
     public List<TableTopDto> getAllTables() {

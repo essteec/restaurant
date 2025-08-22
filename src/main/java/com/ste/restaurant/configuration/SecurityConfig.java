@@ -41,13 +41,15 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",           // Swagger/OpenAPI docs
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/images/**"
+                                "/images/**",
+                                "/qr-codes/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/rest/api/tables/available").permitAll()  // Public: get available tables
                         .requestMatchers(HttpMethod.GET, "/rest/api/menus/active").permitAll()      // Public: get active menus
                         .requestMatchers(HttpMethod.GET, "/rest/api/categories").permitAll()       // Public get all categories
                         .requestMatchers(HttpMethod.GET, "/rest/api/food-items/*/categories").permitAll()
                         .requestMatchers(HttpMethod.GET, "/rest/api/users/*/addresses/**").hasRole("ADMIN")
+                        // .requestMatchers("/qr-codes/**").hasRole("ADMIN")
 
                         // --- DEFAULT RULE ---
                         .anyRequest().authenticated()

@@ -17,6 +17,8 @@ public class TableTop {
     @Column(nullable = false)
     private Integer capacity;
 
+    private String qrCode;
+
     @Enumerated(EnumType.STRING)
     private TableStatus tableStatus = TableStatus.AVAILABLE;
 }

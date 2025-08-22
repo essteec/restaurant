@@ -93,6 +93,14 @@
 			<version>2.7.0</version>
 		</dependency>
 
+		<!-- Spring REST Docs -->
+		<dependency>
+			<groupId>org.springframework.restdocs</groupId>
+			<artifactId>spring-restdocs-mockmvc</artifactId>
+			<version>${spring-restdocs.version}</version>
+			<scope>test</scope>
+		</dependency>
+
 		<!-- JWT -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
@@ -164,13 +172,19 @@
 			<version>1.0.0</version>
 		</dependency>
 
-		<!-- Spring REST Docs -->
+		<!-- https://mvnrepository.com/artifact/com.google.zxing/core -->
 		<dependency>
-			<groupId>org.springframework.restdocs</groupId>
-			<artifactId>spring-restdocs-mockmvc</artifactId>
-			<version>${spring-restdocs.version}</version>
-			<scope>test</scope>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>core</artifactId>
+			<version>3.5.3</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.google.zxing/javase -->
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>javase</artifactId>
+			<version>3.5.3</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>

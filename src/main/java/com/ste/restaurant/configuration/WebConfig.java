@@ -11,9 +11,15 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${app.image.upload-dir}")
     private String uploadDir;
 
+    @Value("${app.image.qr-code-dir}")
+    private String qrUploadDir;
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/images/**")
                 .addResourceLocations("file:" + uploadDir);
-    }
+
+        registry.addResourceHandler("/qr-codes/**")
+                .addResourceLocations("file:" + qrUploadDir);
+    }    
 }

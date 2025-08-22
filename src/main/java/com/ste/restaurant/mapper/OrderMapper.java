@@ -6,6 +6,7 @@ import com.ste.restaurant.dto.userdto.UserDtoCustomer;
 import com.ste.restaurant.dto.userdto.UserDtoEmployee;
 import com.ste.restaurant.dto.userdto.UserDtoIO;
 import com.ste.restaurant.entity.*;
+
 import org.mapstruct.*;
 
 import java.util.List;
@@ -32,7 +33,7 @@ public interface OrderMapper {
 
     TableTopDto tableTopToTableTopDto(TableTop tableTop);
     List<TableTopDto> tableTopsToTableTopDtos(List<TableTop> tableTops);
-
+    
     CallRequest callRequestDtoBasicToCallRequest(CallRequestDtoBasic callRequestDtoBasic);
     CallRequestDto callRequestToCallRequestDto(CallRequest callRequest);
 
