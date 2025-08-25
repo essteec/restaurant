@@ -2,6 +2,7 @@ package com.ste.restaurant.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ste.restaurant.TestConfig;
 import com.ste.restaurant.dto.OrderItemDtoBasic;
 import com.ste.restaurant.dto.PlaceOrderDto;
 import org.junit.jupiter.api.Nested;
@@ -9,8 +10,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +27,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
+@ActiveProfiles("test")
+@Import(TestConfig.class)
 public class OrderControllerIntegrationTest {
 
     @Autowired
@@ -41,9 +46,18 @@ public class OrderControllerIntegrationTest {
         @Test
         @WithMockUser(username = "rick@gmail.com", roles = "CUSTOMER")
         void shouldPlaceOrderSuccessfully() throws Exception {
+        // Fetch a real address for the logged-in customer to avoid hardcoding IDs
+        String addressResponse = mockMvc.perform(get("/rest/api/addresses")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
+        JsonNode addresses = objectMapper.readTree(addressResponse);
+        Long addressId = addresses.get(0).get("addressId").asLong();
+
             PlaceOrderDto placeOrderDto = new PlaceOrderDto();
             placeOrderDto.setNotes("Please make it spicy");
-            placeOrderDto.setAddressId(1L);
+        placeOrderDto.setAddressId(addressId);
             placeOrderDto.setTableNumber("7A");
 
             List<OrderItemDtoBasic> orderItems = new ArrayList<>();
@@ -90,7 +104,9 @@ public class OrderControllerIntegrationTest {
                             .content(objectMapper.writeValueAsString(placeOrderDto)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.data.notes").value("Admin order"));
-        }        @Test
+    }
+
+    @Test
         @WithMockUser(username = "bulent@restaurant.com", roles = "WAITER")
         void shouldAllowWaiterToPlaceOrder() throws Exception {
             PlaceOrderDto placeOrderDto = new PlaceOrderDto();
@@ -118,7 +134,7 @@ public class OrderControllerIntegrationTest {
         void shouldAllowChefToPlaceOrder() throws Exception {
             PlaceOrderDto placeOrderDto = new PlaceOrderDto();
             placeOrderDto.setNotes("Chef order");
-            placeOrderDto.setTableNumber("7A"); // Providing a table number
+            placeOrderDto.setTableNumber("7A"); // Providing a.java table number
 
             List<OrderItemDtoBasic> orderItems = new ArrayList<>();
             OrderItemDtoBasic item = new OrderItemDtoBasic();
@@ -235,8 +251,29 @@ public class OrderControllerIntegrationTest {
         }
 
         @Test
-        @WithMockUser(username = "rick@gmail.com", roles = "ADMIN")
+    @WithMockUser(username = "somer@restaurant.com", roles = "ADMIN")
         void shouldGetLastOrderForAdmin() throws Exception {
+        PlaceOrderDto placeOrderDto = new PlaceOrderDto();
+        placeOrderDto.setNotes("Seed order for admin last order test");
+        placeOrderDto.setTableNumber("7A");
+
+        List<OrderItemDtoBasic> items = new ArrayList<>();
+        OrderItemDtoBasic item = new OrderItemDtoBasic();
+        item.setFoodName("Cheeseburger");
+        item.setQuantity(1);
+        items.add(item);
+        placeOrderDto.setOrderItems(items);
+
+        // Temporarily impersonate a customer to place order
+        // This endpoint requires authentication; use existing mock customer context
+        // by calling place order within a nested request using perform with user() is non-trivial here,
+        // so instead we just proceed as admin; service allows admin to place orders.
+        mockMvc.perform(post("/rest/api/orders")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(placeOrderDto)))
+            .andExpect(status().isOk());
+
             mockMvc.perform(get("/rest/api/orders/last")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
@@ -245,11 +282,11 @@ public class OrderControllerIntegrationTest {
 
         @Test
         @WithMockUser(username = "rachel@hotmail.com", roles = "CHEF")
-        void shouldReturn404WhenChefHasNoOrders() throws Exception {
-            mockMvc.perform(get("/rest/api/orders/last")
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isNotFound());
-        }
+    void shouldReturn404WhenChefHasNoOrders() throws Exception {
+        mockMvc.perform(get("/rest/api/orders/last")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound());
+    }
     }
 
     @Nested
@@ -261,19 +298,46 @@ public class OrderControllerIntegrationTest {
         @Test
         @WithMockUser(username = "rick@gmail.com", roles = "CUSTOMER")
         void shouldGetOrderByIdSuccessfully() throws Exception {
-            // First get the last order to get a valid ID
-            String lastOrderResponse = mockMvc.perform(get("/rest/api/orders/last")
+            // Given: Get user's first address to use for order
+            String addressResponse = mockMvc.perform(get("/rest/api/addresses")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andReturn().getResponse().getContentAsString();
             
-            JsonNode lastOrder = objectMapper.readTree(lastOrderResponse);
-            Long orderId = lastOrder.get("orderId").asLong();
+            JsonNode addresses = objectMapper.readTree(addressResponse);
+            Long addressId = addresses.get(0).get("addressId").asLong();
 
+            // Given: Place an order first
+            PlaceOrderDto placeOrderDto = new PlaceOrderDto();
+            placeOrderDto.setNotes("Order for get by ID test");
+            placeOrderDto.setAddressId(addressId); // Use actual address ID
+            placeOrderDto.setTableNumber("7A"); // Assuming table 7A exists
+
+            List<OrderItemDtoBasic> orderItems = new ArrayList<>();
+            OrderItemDtoBasic item1 = new OrderItemDtoBasic();
+            item1.setFoodName("Cheeseburger"); // Assuming Cheeseburger exists
+            item1.setQuantity(2);
+            orderItems.add(item1);
+            placeOrderDto.setOrderItems(orderItems);
+
+            String placeOrderResponse = mockMvc.perform(post("/rest/api/orders")
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(placeOrderDto)))
+                    .andExpect(status().isOk())
+                    .andReturn().getResponse().getContentAsString();
+
+            JsonNode placedOrder = objectMapper.readTree(placeOrderResponse).get("data");
+            Long orderId = placedOrder.get("orderId").asLong();
+
+            // When: Get the order by ID
             mockMvc.perform(get("/rest/api/orders/" + orderId)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.orderId").value(orderId));
+                    .andExpect(jsonPath("$.orderId").value(orderId))
+                    .andExpect(jsonPath("$.notes").value("Order for get by ID test"))
+                    .andExpect(jsonPath("$.orderItems.length()").value(1))
+                    .andExpect(jsonPath("$.orderItems[0].foodItem.foodName").value("Cheeseburger"));
         }
 
         @Test
@@ -320,19 +384,53 @@ public class OrderControllerIntegrationTest {
         @Test
         @WithMockUser(username = "rick@gmail.com", roles = "CUSTOMER")
         void shouldGetOrderItemsSuccessfully() throws Exception {
-            // First get the last order to get a valid ID
-            String lastOrderResponse = mockMvc.perform(get("/rest/api/orders/last")
+            // Given: Get user's first address to use for order
+            String addressResponse = mockMvc.perform(get("/rest/api/addresses")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andReturn().getResponse().getContentAsString();
             
-            JsonNode lastOrder = objectMapper.readTree(lastOrderResponse);
-            Long orderId = lastOrder.get("orderId").asLong();
+            JsonNode addresses = objectMapper.readTree(addressResponse);
+            Long addressId = addresses.get(0).get("addressId").asLong();
 
+            // Given: Place an order first
+            PlaceOrderDto placeOrderDto = new PlaceOrderDto();
+            placeOrderDto.setNotes("Order for items test");
+            placeOrderDto.setAddressId(addressId); // Use actual address ID
+            placeOrderDto.setTableNumber("7A"); // Assuming table 7A exists
+
+            List<OrderItemDtoBasic> orderItems = new ArrayList<>();
+            OrderItemDtoBasic item1 = new OrderItemDtoBasic();
+            item1.setFoodName("Cheeseburger"); // Assuming Cheeseburger exists
+            item1.setQuantity(2);
+            orderItems.add(item1);
+
+            OrderItemDtoBasic item2 = new OrderItemDtoBasic();
+            item2.setFoodName("Caesar Salad"); // Assuming Caesar Salad exists
+            item2.setQuantity(1);
+            orderItems.add(item2);
+            placeOrderDto.setOrderItems(orderItems);
+
+            String placeOrderResponse = mockMvc.perform(post("/rest/api/orders")
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(placeOrderDto)))
+                    .andExpect(status().isOk())
+                    .andReturn().getResponse().getContentAsString();
+
+            JsonNode placedOrder = objectMapper.readTree(placeOrderResponse).get("data");
+            Long orderId = placedOrder.get("orderId").asLong();
+
+            // When: Get order items for the placed order
             mockMvc.perform(get("/rest/api/orders/" + orderId + "/items")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$").isArray());
+                    .andExpect(jsonPath("$").isArray())
+                    .andExpect(jsonPath("$.length()").value(2)) // Expect 2 items
+                    .andExpect(jsonPath("$[0].foodItem.foodName").value("Cheeseburger"))
+                    .andExpect(jsonPath("$[0].quantity").value(2))
+                    .andExpect(jsonPath("$[1].foodItem.foodName").value("Caesar Salad"))
+                    .andExpect(jsonPath("$[1].quantity").value(1));
         }
 
         @Test
@@ -379,7 +477,40 @@ public class OrderControllerIntegrationTest {
         @Test
         @WithMockUser(username = "rick@gmail.com", roles = "CUSTOMER")
         void shouldCancelOrderSuccessfully() throws Exception {
-            mockMvc.perform(patch("/rest/api/orders/1/cancel")
+            // Given: Get user's first address to use for order
+            String addressResponse = mockMvc.perform(get("/rest/api/addresses")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andReturn().getResponse().getContentAsString();
+            
+            JsonNode addresses = objectMapper.readTree(addressResponse);
+            Long addressId = addresses.get(0).get("addressId").asLong();
+
+            // Given: Place an order first
+            PlaceOrderDto placeOrderDto = new PlaceOrderDto();
+            placeOrderDto.setNotes("Order to be cancelled");
+            placeOrderDto.setAddressId(addressId); // Use actual address ID
+            placeOrderDto.setTableNumber("7A"); // Assuming table 7A exists
+
+            List<OrderItemDtoBasic> orderItems = new ArrayList<>();
+            OrderItemDtoBasic item1 = new OrderItemDtoBasic();
+            item1.setFoodName("Cheeseburger"); // Assuming Cheeseburger exists
+            item1.setQuantity(1);
+            orderItems.add(item1);
+            placeOrderDto.setOrderItems(orderItems);
+
+            String placeOrderResponse = mockMvc.perform(post("/rest/api/orders")
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(placeOrderDto)))
+                    .andExpect(status().isOk())
+                    .andReturn().getResponse().getContentAsString();
+
+            JsonNode placedOrder = objectMapper.readTree(placeOrderResponse).get("data");
+            Long orderId = placedOrder.get("orderId").asLong();
+
+            // When: Attempt to cancel the placed order
+            mockMvc.perform(patch("/rest/api/orders/" + orderId + "/cancel")
                             .with(csrf()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value("CANCELLED"));

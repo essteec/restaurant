@@ -327,7 +327,7 @@ public class DataSeeder implements CommandLineRunner {
         }
     }
 
-    // Generic helper to read a JSON list from the classpath
+    // Generic helper to read a.java JSON list from the classpath
     private <T> T readJsonList(String resource, TypeReference<T> typeRef) throws IOException {
         try (InputStream is = new ClassPathResource(resource).getInputStream()) {
             return mapper.readValue(is, typeRef);

@@ -2,14 +2,22 @@ package com.ste.restaurant.service;
 
 import com.ste.restaurant.dto.CategoryDtoBasic;
 import com.ste.restaurant.dto.FoodItemDto;
+import com.ste.restaurant.dto.FoodItemTranslationDto;
 import com.ste.restaurant.entity.Category;
 import com.ste.restaurant.entity.FoodItem;
+import com.ste.restaurant.entity.FoodItemTranslation;
 import com.ste.restaurant.exception.AlreadyExistsException;
 import com.ste.restaurant.exception.ImageProcessingException;
+import com.ste.restaurant.exception.InvalidValueException;
 import com.ste.restaurant.exception.NotFoundException;
 import com.ste.restaurant.exception.NullValueException;
 import com.ste.restaurant.mapper.OrderMapper;
 import com.ste.restaurant.repository.FoodItemRepository;
+import com.ste.restaurant.repository.FoodItemTranslationRepository;
+
+import io.micrometer.core.instrument.config.validate.Validated.Invalid;
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,12 +33,16 @@ import java.util.*;
 public class FoodItemService {
 
     private final FoodItemRepository foodItemRepository;
+    private final FoodItemTranslationRepository foodItemTranslationRepository;
     private final OrderMapper orderMapper;
     private final String uploadDir;
 
-    public FoodItemService(FoodItemRepository foodItemRepo, OrderMapper orderMapper,
+    public FoodItemService(FoodItemRepository foodItemRepo,
+                           FoodItemTranslationRepository foodItemTranslationRepo,
+                           OrderMapper orderMapper,
                            @Value("${app.image.upload-dir}") String uploadDir) {
         this.foodItemRepository = foodItemRepo;
+        this.foodItemTranslationRepository = foodItemTranslationRepo;
         this.orderMapper = orderMapper;
         this.uploadDir = uploadDir;
     }
@@ -106,7 +118,7 @@ public class FoodItemService {
         try {
             String extension = ServiceUtil.getFileExtension(originalFilename);
             if (extension.isEmpty()) throw new NullValueException("Image", "extension");
-            String fileName = name.replaceAll("\\s+", "-") + LocalDateTime.now().format(DateTimeFormatter.ofPattern("_yyyy-MM-dd_HH-mm-ss.")) +
+            String fileName = name.replaceAll("\s+", "-") + LocalDateTime.now().format(DateTimeFormatter.ofPattern("_yyyy-MM-dd_HH-mm-ss.")) +
                     extension;
             java.io.File dirFile = new java.io.File(uploadDir);
             if (!dirFile.exists()) {
@@ -153,5 +165,63 @@ public class FoodItemService {
             }
         }
         return false;
+    }
+
+    public List<FoodItemTranslationDto> getFoodItemTranslations(String name) {
+        FoodItem food = foodItemRepository.findByFoodName(name)
+                .orElseThrow(() -> new NotFoundException("Food", name));
+
+        
+        return orderMapper.foodItemTranslationsToFoodItemTranslationDtos(
+                new ArrayList<>(food.getTranslations().values())
+        );
+    }
+
+    public FoodItemTranslationDto addFoodItemTranslation(String name, FoodItemTranslationDto translationDto) {
+        FoodItem food = foodItemRepository.findByFoodName(name)
+                .orElseThrow(() -> new NotFoundException("Food", name));
+
+        FoodItemTranslation translation = orderMapper.foodItemTranslationDtoToFoodItemTranslation(translationDto);
+        translation.setFoodItem(food);
+        foodItemTranslationRepository.save(translation);
+
+        return orderMapper.foodItemTranslationToFoodItemTranslationDto(translation);
+    }
+
+    public boolean deleteFoodItemTranslation(String name, String langCode) {
+        FoodItem food = foodItemRepository.findByFoodName(name)
+                .orElseThrow(() -> new NotFoundException("Food", name));
+
+        if (!food.getTranslations().containsKey(langCode)) {
+            throw new InvalidValueException("Food", "language code", langCode);
+        }
+
+        FoodItemTranslation translation = food.getTranslations().get(langCode);
+        if (translation == null) {
+            throw new NotFoundException("FoodItemTranslation", langCode);
+        }
+
+        food.getTranslations().remove(langCode);
+        foodItemRepository.save(food);
+        return true;
+    }
+
+    public FoodItemTranslationDto updateFoodItemTranslation(String name, String langCode,
+                                                            FoodItemTranslationDto translationDto) {
+        FoodItem food = foodItemRepository.findByFoodName(name)
+                .orElseThrow(() -> new NotFoundException("Food", name));
+
+        if (!food.getTranslations().containsKey(langCode)) {
+            throw new InvalidValueException("FoodItemTranslation", "language code", langCode);
+        }
+
+        FoodItemTranslation translation = food.getTranslations().get(langCode);
+        if (translation == null) {
+            throw new NotFoundException("FoodItemTranslation", langCode);
+        }
+
+        orderMapper.updateFoodItemTranslationFromDto(translationDto, translation);
+        foodItemTranslationRepository.save(translation);
+        return orderMapper.foodItemTranslationToFoodItemTranslationDto(translation);
     }
 }

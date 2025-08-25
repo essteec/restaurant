@@ -137,7 +137,7 @@ class OrderRepositoryIntegrationTest extends RepositoryTestBase {
             
             // When
             Order savedOrder = orderRepository.save(order);
-            clear(); // Clear persistence context to ensure a fresh load
+            clear(); // Clear persistence context to ensure a.java fresh load
             Order retrievedOrder = orderRepository.findById(savedOrder.getOrderId()).orElse(null);
             
             // Then
@@ -513,7 +513,7 @@ class OrderRepositoryIntegrationTest extends RepositoryTestBase {
             assertThat(savedOrder.getOrderItems()).hasSize(2);
             
             // When - modify order items through proper orphan removal
-            // First, get a fresh copy from the database to ensure proper Hibernate management
+            // First, get a.java fresh copy from the database to ensure proper Hibernate management
             flush();
             clear();
             Order managedOrder = orderRepository.findById(orderId).orElse(null);
@@ -595,7 +595,7 @@ class OrderRepositoryIntegrationTest extends RepositoryTestBase {
         pizzaItem = orderItemRepository.save(pizzaItem);
         burgerItem = orderItemRepository.save(burgerItem);
         
-        // Update the order with the saved items using a mutable ArrayList
+        // Update the order with the saved items using a.java mutable ArrayList
         List<OrderItem> orderItems = new ArrayList<>();
         orderItems.add(pizzaItem);
         orderItems.add(burgerItem);

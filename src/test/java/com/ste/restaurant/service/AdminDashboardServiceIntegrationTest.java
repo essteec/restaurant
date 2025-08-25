@@ -130,7 +130,7 @@ public class AdminDashboardServiceIntegrationTest {
         @Test
         @DisplayName("Should correctly identify new customers within date range")
         void shouldCorrectlyIdentifyNewCustomersWithinDateRange() {
-            // Given - Create a new customer with first order in a test period
+            // Given - Create a.java new customer with first order in a.java test period
             String timestamp = String.valueOf(System.currentTimeMillis());
             User newCustomer = createTestCustomer("new" + timestamp + "@customer.com", "New", "Customer");
             Order newCustomerOrder = createTestOrder(newCustomer, testTable1, LocalDateTime.now().minusDays(2));
@@ -195,8 +195,7 @@ public class AdminDashboardServiceIntegrationTest {
             
             // When
             List<RevenueDataPointDto> chartData = adminDashboardService.getRevenueChart(longStart, longEnd);
-            
-            // Then - Should use a daily format (no hour)
+
             if (!chartData.isEmpty()) {
                 assertThat(chartData.get(0).getLabel()).matches("\\d{4}-\\d{2}-\\d{2}");
                 assertThat(chartData.get(0).getLabel()).doesNotContain(" ");

@@ -22,9 +22,21 @@ public interface OrderMapper {
     CategoryDto categoryToCategoryDto(Category category);
     CategoryDtoBasic categoryToCategoryDtoBasic(Category category);
     Set<CategoryDtoBasic> categoriesToCategoryDtoBasics(Set<Category> categories);
+    
+    CategoryTranslation categoryTranslationDtoToCategoryTranslation(CategoryTranslationDto translationDto);
+    CategoryTranslationDto categoryTranslationToCategoryTranslationDto(CategoryTranslation translation);
+    List<CategoryTranslationDto> categoryTranslationsToCategoryTranslationDtos(List<CategoryTranslation> translations);
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateCategoryTranslationFromDto(CategoryTranslationDto translationDto, @MappingTarget CategoryTranslation translation);
 
     FoodItem foodItemDtoToFoodItem(FoodItemDto foodItemDto);
     FoodItemDto foodItemToFoodItemDto(FoodItem foodItem);
+
+    FoodItemTranslation foodItemTranslationDtoToFoodItemTranslation(FoodItemTranslationDto foodItemTranslationDto);
+    FoodItemTranslationDto foodItemTranslationToFoodItemTranslationDto(FoodItemTranslation foodItemTranslation);
+    List<FoodItemTranslationDto> foodItemTranslationsToFoodItemTranslationDtos(List<FoodItemTranslation> translations);
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateFoodItemTranslationFromDto(FoodItemTranslationDto translationDto, @MappingTarget FoodItemTranslation translation);
 
     User userDtoIOToUser(UserDtoIO userDtoIO);
     UserDto userToUserDto(User user);
@@ -55,6 +67,8 @@ public interface OrderMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateUserFromDtoIO(UserDtoIO userDtoIO, @MappingTarget User user);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateUserFromDtoEmployee(UserDtoEmployee userDtoEmployee, @MappingTarget User user);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

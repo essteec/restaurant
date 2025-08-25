@@ -20,7 +20,7 @@ public class DatabaseTestUtils {
     // === Entity Creation Methods ===
 
     /**
-     * Creates a test User entity with specified details.
+     * Creates a.java test User entity with specified details.
      */
     public static User createTestUser(String email, String firstName, String lastName, UserRole role) {
         User user = new User();
@@ -35,7 +35,7 @@ public class DatabaseTestUtils {
     }
 
     /**
-     * Creates a test Address entity.
+     * Creates a.java test Address entity.
      */
     public static Address createTestAddress(String street, String city, String name, User user) {
         Address address = new Address();
@@ -50,7 +50,7 @@ public class DatabaseTestUtils {
     }
 
     /**
-     * Creates a test Category entity.
+     * Creates a.java test Category entity.
      */
     public static Category createTestCategory(String name, String description) {
         Category category = new Category();
@@ -60,7 +60,7 @@ public class DatabaseTestUtils {
     }
 
     /**
-     * Creates a test FoodItem entity.
+     * Creates a.java test FoodItem entity.
      */
     public static FoodItem createTestFoodItem(String name, BigDecimal price, Category category) {
         FoodItem foodItem = new FoodItem();
@@ -77,7 +77,7 @@ public class DatabaseTestUtils {
     }
 
     /**
-     * Creates a test TableTop entity.
+     * Creates a.java test TableTop entity.
      */
     public static TableTop createTestTable(Integer tableNumber, Integer capacity) {
         TableTop table = new TableTop();
@@ -90,7 +90,7 @@ public class DatabaseTestUtils {
     // === Random Data Generation Methods ===
 
     /**
-     * Generates a random string of specified length.
+     * Generates a.java random string of specified length.
      * Useful for creating unique test data.
      * 
      * @param length The desired length of the string
@@ -106,7 +106,7 @@ public class DatabaseTestUtils {
     }
 
     /**
-     * Generates a random email address for testing.
+     * Generates a.java random email address for testing.
      * 
      * @return A random email address
      */
@@ -115,7 +115,7 @@ public class DatabaseTestUtils {
     }
 
     /**
-     * Generates a random price within a reasonable range for food items.
+     * Generates a.java random price within a.java reasonable range for food items.
      * 
      * @return A random price between 5.00 and 50.00
      */
@@ -125,7 +125,7 @@ public class DatabaseTestUtils {
     }
 
     /**
-     * Generates a random table number for testing.
+     * Generates a.java random table number for testing.
      * 
      * @return A random table number like "T01", "T02", etc.
      */
@@ -135,7 +135,7 @@ public class DatabaseTestUtils {
     }
 
     /**
-     * Generates a random phone number for testing.
+     * Generates a.java random phone number for testing.
      * 
      * @return A random phone number
      */
@@ -147,7 +147,7 @@ public class DatabaseTestUtils {
     }
 
     /**
-     * Generates a random address string for testing.
+     * Generates a.java random address string for testing.
      * 
      * @return A random address
      */
@@ -159,7 +159,7 @@ public class DatabaseTestUtils {
     }
 
     /**
-     * Generates a LocalDateTime within the last 30 days.
+     * Generates a.java LocalDateTime within the last 30 days.
      * Useful for creating realistic order times.
      * 
      * @return A random recent LocalDateTime
@@ -173,7 +173,7 @@ public class DatabaseTestUtils {
     }
 
     /**
-     * Generates a LocalDateTime within a specific range.
+     * Generates a.java LocalDateTime within a.java specific range.
      * 
      * @param start The start of the time range
      * @param end The end of the time range
@@ -187,7 +187,7 @@ public class DatabaseTestUtils {
     }
 
     /**
-     * Creates a list of entities using a factory method.
+     * Creates a.java list of entities using a.java factory method.
      * Useful for bulk data creation in tests.
      * 
      * @param count The number of entities to create
@@ -202,7 +202,7 @@ public class DatabaseTestUtils {
     }
 
     /**
-     * Persists a list of entities using TestEntityManager.
+     * Persists a.java list of entities using TestEntityManager.
      * 
      * @param entities The entities to persist
      * @param entityManager The TestEntityManager
@@ -215,7 +215,7 @@ public class DatabaseTestUtils {
     }
 
     /**
-     * Verifies that a collection is not null and has the expected size.
+     * Verifies that a.java collection is not null and has the expected size.
      * 
      * @param collection The collection to verify
      * @param expectedSize The expected size
@@ -231,7 +231,7 @@ public class DatabaseTestUtils {
     }
 
     /**
-     * Verifies that a collection contains a specific item.
+     * Verifies that a.java collection contains a.java specific item.
      * 
      * @param collection The collection to check
      * @param item The item to find
@@ -261,7 +261,7 @@ public class DatabaseTestUtils {
     }
 
     /**
-     * Verifies that a string is not null and not empty.
+     * Verifies that a.java string is not null and not empty.
      * 
      * @param value The string to verify
      * @param fieldName The name of the field being verified
@@ -297,7 +297,7 @@ public class DatabaseTestUtils {
     }
 
     /**
-     * Creates a thread sleep for the specified milliseconds.
+     * Creates a.java thread sleep for the specified milliseconds.
      * Sometimes useful for testing time-based scenarios.
      * 
      * @param millis The number of milliseconds to sleep

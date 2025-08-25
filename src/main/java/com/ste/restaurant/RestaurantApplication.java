@@ -6,6 +6,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 
 @EnableCaching
 @SpringBootApplication
@@ -16,6 +17,7 @@ public class RestaurantApplication {
 	}
 
 	@Bean  // update it from openai to gemini api
+	@Profile("!test") // Don't create this bean when test profile is active
 	public Client geminiClient(@Value("${gemini.apiKey}") String apiKey) {
 		if (apiKey == null || apiKey.isEmpty()) {
 			throw new IllegalArgumentException("Gemini API key must be provided");

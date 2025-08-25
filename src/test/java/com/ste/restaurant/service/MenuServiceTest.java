@@ -39,6 +39,9 @@ class MenuServiceTest {
     @Mock
     private OrderMapper orderMapper;
 
+    @Mock
+    private LanguageService languageService;
+
     @InjectMocks
     private MenuService menuService;
 
@@ -409,9 +412,11 @@ class MenuServiceTest {
         List<Menu> activeMenus = Arrays.asList(testMenu);
         when(menuRepository.findAllByActive(true)).thenReturn(activeMenus);
         when(orderMapper.foodItemToFoodItemDto(testFoodItem)).thenReturn(testFoodItemDto);
+        when(languageService.countDistinctLanguages()).thenReturn(1L);
+        when(languageService.existsByLanguageCode("en")).thenReturn(true);
 
         // Act
-        List<CategoryDto> result = menuService.getActiveMenu();
+        List<CategoryDto> result = menuService.getActiveMenu("en");
 
         // Assert
         assertThat(result).isNotNull();
@@ -420,6 +425,8 @@ class MenuServiceTest {
         assertThat(result.get(0).getFoodItems()).hasSize(1);
         verify(menuRepository).findAllByActive(true);
         verify(orderMapper).foodItemToFoodItemDto(testFoodItem);
+        verify(languageService).countDistinctLanguages();
+        verify(languageService).existsByLanguageCode("en");
     }
 
     @Test
@@ -435,9 +442,11 @@ class MenuServiceTest {
         
         when(menuRepository.findAllByActive(true)).thenReturn(activeMenus);
         when(orderMapper.foodItemToFoodItemDto(testFoodItem)).thenReturn(testFoodItemDto);
+        when(languageService.countDistinctLanguages()).thenReturn(1L);
+        when(languageService.existsByLanguageCode("en")).thenReturn(true);
 
         // Act
-        List<CategoryDto> result = menuService.getActiveMenu();
+        List<CategoryDto> result = menuService.getActiveMenu("en");
 
         // Assert
         assertThat(result).isNotNull();
@@ -445,20 +454,26 @@ class MenuServiceTest {
         // The image path should be modified by the service
         verify(menuRepository).findAllByActive(true);
         verify(orderMapper).foodItemToFoodItemDto(testFoodItem);
+        verify(languageService).countDistinctLanguages();
+        verify(languageService).existsByLanguageCode("en");
     }
 
     @Test
     void getActiveMenu_noActiveMenus() {
         // Arrange
         when(menuRepository.findAllByActive(true)).thenReturn(Collections.emptyList());
+        when(languageService.countDistinctLanguages()).thenReturn(1L);
+        when(languageService.existsByLanguageCode("en")).thenReturn(true);
 
         // Act
-        List<CategoryDto> result = menuService.getActiveMenu();
+        List<CategoryDto> result = menuService.getActiveMenu("en");
 
         // Assert
         assertThat(result).isNotNull();
         assertThat(result).isEmpty();
         verify(menuRepository).findAllByActive(true);
+        verify(languageService).countDistinctLanguages();
+        verify(languageService).existsByLanguageCode("en");
     }
 
     @Test

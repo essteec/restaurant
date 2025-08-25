@@ -154,7 +154,7 @@ class MenuControllerIntegrationTest {
         @WithMockUser(roles = "ADMIN")
         @DisplayName("Should delete menu successfully when user is admin")
         void shouldDeleteMenuSuccessfully() throws Exception {
-            // First create a menu to delete
+            // First create a.java menu to delete
             MenuDtoBasic menuDto = new MenuDtoBasic("Test Menu", "Test description");
             mockMvc.perform(post("/rest/api/menus")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -185,7 +185,7 @@ class MenuControllerIntegrationTest {
         @WithMockUser(roles = "ADMIN")
         @DisplayName("Should update menu successfully when user is admin")
         void shouldUpdateMenuSuccessfully() throws Exception {
-            // First create a menu to update
+            // First create a.java menu to update
             MenuDtoBasic originalMenu = new MenuDtoBasic("Test Menu", "Original description");
             mockMvc.perform(post("/rest/api/menus")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -268,7 +268,7 @@ class MenuControllerIntegrationTest {
         @WithMockUser(roles = "ADMIN")
         @DisplayName("Should add food items to menu successfully when user is admin")
         void shouldAddFoodItemsToMenuSuccessfully() throws Exception {
-            // First create a menu
+            // First create a.java menu
             MenuDtoBasic menuDto = new MenuDtoBasic("Test Menu", "Test description");
             mockMvc.perform(post("/rest/api/menus")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -289,7 +289,7 @@ class MenuControllerIntegrationTest {
         @WithMockUser(roles = "ADMIN")
         @DisplayName("Should remove food items from menu successfully when user is admin")
         void shouldRemoveFoodItemsFromMenuSuccessfully() throws Exception {
-            // First create a menu and add items
+            // First create a.java menu and add items
             MenuDtoBasic menuDto = new MenuDtoBasic("Test Menu", "Test description");
             mockMvc.perform(post("/rest/api/menus")
                     .contentType(MediaType.APPLICATION_JSON)

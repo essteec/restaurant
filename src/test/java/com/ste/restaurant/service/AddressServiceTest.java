@@ -120,7 +120,7 @@ class AddressServiceTest {
         savedAddress.setAddressId(1L);
         savedAddress.setName("New Address");
 
-        // Create a DTO that matches the savedAddress for the return value mock
+        // Create a.java DTO that matches the savedAddress for the return value mock
         AddressDto savedAddressDto = new AddressDto(savedAddress.getAddressId(), savedAddress.getName(), "Country", "City", "Province", null, null, "Street", "Apartment", null);
 
         when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(testUser));

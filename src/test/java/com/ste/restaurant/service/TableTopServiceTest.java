@@ -39,7 +39,7 @@ class TableTopServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Test table entity - using a real object since it's an entity
+        // Test table entity - using a.java real object since it's an entity
         testTable = new TableTop();
         testTable.setTableId(1L);
         testTable.setTableNumber("T01");
@@ -55,12 +55,23 @@ class TableTopServiceTest {
         // Test string DTO
         testStringDto = new StringDto();
         testStringDto.setName("OCCUPIED");
+
+        org.springframework.test.util.ReflectionTestUtils.setField(tableTopService, "siteBaseUrl", "http://localhost:8080");
+        org.springframework.test.util.ReflectionTestUtils.setField(tableTopService, "qrCodeDir", "qrcodes/");
     }
 
     @Test
     void saveTable_success() {
         // Arrange
         when(tableRepository.existsTableTopByTableNumber("T01")).thenReturn(false);
+        doAnswer(invocation -> {
+            TableTopDto dto = invocation.getArgument(0);
+            TableTop entity = invocation.getArgument(1);
+            entity.setTableNumber(dto.getTableNumber());
+            entity.setCapacity(dto.getCapacity());
+            entity.setTableStatus(dto.getTableStatus());
+            return null;
+        }).when(orderMapper).updateTableFromDto(any(TableTopDto.class), any(TableTop.class));
         when(tableRepository.save(any(TableTop.class))).thenReturn(testTable);
         when(orderMapper.tableTopToTableTopDto(testTable)).thenReturn(testTableDto);
 

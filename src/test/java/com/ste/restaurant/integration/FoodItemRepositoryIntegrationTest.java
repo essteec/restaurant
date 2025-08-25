@@ -276,7 +276,7 @@ class FoodItemRepositoryIntegrationTest {
         @Test
         @DisplayName("Should handle food item with no categories")
         void shouldHandleFoodItemWithNoCategories() {
-            // Given - Create a food item without categories
+            // Given - Create a.java food item without categories
             FoodItem foodItemWithoutCategories = createTestFoodItem("Plain Bread", "Simple bread roll", BigDecimal.valueOf(2.99));
             FoodItem savedFoodItem = foodItemRepository.save(foodItemWithoutCategories);
             entityManager.flush();

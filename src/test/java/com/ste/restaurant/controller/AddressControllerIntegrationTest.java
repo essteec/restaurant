@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
+@ActiveProfiles("test")
 public class AddressControllerIntegrationTest {
 
     @Autowired
@@ -37,7 +39,7 @@ public class AddressControllerIntegrationTest {
         @WithMockUser(username = "rick@gmail.com", roles = "CUSTOMER")
         void shouldCreateAddressSuccessfully() throws Exception {
             AddressDto addressDto = new AddressDto();
-            addressDto.setName("New Office"); // Use a unique name to avoid conflicts
+            addressDto.setName("New Office"); // Use a.java unique name to avoid conflicts
             addressDto.setCountry("Turkey");
             addressDto.setCity("Ankara");
             addressDto.setProvince("Central Anatolia");

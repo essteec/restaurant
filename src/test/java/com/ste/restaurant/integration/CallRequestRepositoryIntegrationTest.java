@@ -505,7 +505,7 @@ class CallRequestRepositoryIntegrationTest {
         @DisplayName("Should handle long message content within limits")
         void shouldHandleLongMessageContent() {
             // Given - Test with message close to but under 255 character limit
-            String longMessage = "This is a reasonably long message that contains enough text to test how the database handles longer strings in the message field without exceeding the 255 character limit imposed by the database schema.";
+            String longMessage = "This is a.java reasonably long message that contains enough text to test how the database handles longer strings in the message field without exceeding the 255 character limit imposed by the database schema.";
             CallRequest longMessageRequest = createTestCallRequest(
                 RequestType.ASSISTANCE, longMessage, true, testTable1, testCustomer1, LocalDateTime.now()
             );

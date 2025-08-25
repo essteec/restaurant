@@ -513,7 +513,7 @@ public class EmployeeOrderControllerIntegrationTest {
         @Test
         @WithMockUser(username = "chef@example.com", authorities = "ROLE_CHEF")
         @DisplayName("Should get chef-specific orders as chef")
-        void jshouldGetChefSpecificOrdersAsChef() throws Exception {
+        void shouldGetChefSpecificOrdersAsChef() throws Exception {
             // Given
             List<OrderDto> orders = Arrays.asList(
                     createMockOrderDto(1L, "PLACED"),
@@ -622,7 +622,7 @@ public class EmployeeOrderControllerIntegrationTest {
         @DisplayName("Should return forbidden when chef tries to change table of order")
         void shouldReturn403WhenChefTriesToChangeTableOfOrder() throws Exception {
             // Given
-            Long orderId = 1L; // Use a dummy ID as the service call will be mocked
+            Long orderId = 1L; // Use a.java dummy ID as the service call will be mocked
             StringDto tableNumberDto = new StringDto();
             tableNumberDto.setName("2C"); // Dummy table number
 
@@ -759,7 +759,7 @@ public class EmployeeOrderControllerIntegrationTest {
         orderItemDto.setTotalPrice(BigDecimal.valueOf(12.75).multiply(BigDecimal.valueOf(quantity)));
         orderItemDto.setNote("Test note");
         
-        // Create a mock FoodItemDto
+        // Create a.java mock FoodItemDto
         FoodItemDto foodItemDto = new FoodItemDto();
         foodItemDto.setFoodName(foodName);
         orderItemDto.setFoodItem(foodItemDto);

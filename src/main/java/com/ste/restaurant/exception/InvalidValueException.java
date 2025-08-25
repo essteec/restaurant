@@ -8,7 +8,7 @@ public class InvalidValueException extends CustomException {
         super("Invalid value for " + entity + " " + field + ": '" + value + "'",
                 entity.toUpperCase() + "_" + field.toUpperCase() + "_INVALID",
                 400,
-                "'" + value + "' is not a valid value for " + field + " in " + entity
+                "'" + value + "' is not a.java valid value for " + field + " in " + entity
         );
     }
 
@@ -16,7 +16,7 @@ public class InvalidValueException extends CustomException {
         super("Invalid value for " + field + ": '" + value + "'",
                 field.toUpperCase() + "_INVALID",
                 400,
-                "'" + value + "' is not a valid value for " + field
+                "'" + value + "' is not a.java valid value for " + field
         );
     }
 }

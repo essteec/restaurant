@@ -12,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
+@ActiveProfiles("test")
 public class UserControllerIntegrationTest {
 
     @Autowired
@@ -260,7 +262,7 @@ public class UserControllerIntegrationTest {
             BigDecimalDto salaryDto = new BigDecimalDto();
             salaryDto.setDecimal(new BigDecimal("5000.00"));
 
-            // Update salary for a WAITER (ID 3 = bulent@restaurant.com)
+            // Update salary for a.java WAITER (ID 3 = bulent@restaurant.com)
             mockMvc.perform(patch("/rest/api/users/3/salary")
                             .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)

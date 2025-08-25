@@ -4,13 +4,19 @@ import com.ste.restaurant.dto.*;
 import com.ste.restaurant.dto.common.StringsDto;
 import com.ste.restaurant.dto.common.WarningResponse;
 import com.ste.restaurant.entity.Category;
+import com.ste.restaurant.entity.CategoryTranslation;
 import com.ste.restaurant.entity.FoodItem;
 import com.ste.restaurant.exception.AlreadyExistsException;
+import com.ste.restaurant.exception.InvalidValueException;
 import com.ste.restaurant.exception.NotFoundException;
 import com.ste.restaurant.exception.NullValueException;
 import com.ste.restaurant.mapper.OrderMapper;
 import com.ste.restaurant.repository.CategoryRepository;
+import com.ste.restaurant.repository.CategoryTranslationRepository;
 import com.ste.restaurant.repository.FoodItemRepository;
+
+import jakarta.validation.Valid;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,12 +27,15 @@ import java.util.*;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final CategoryTranslationRepository categoryTranslationRepository;
     private final FoodItemRepository foodItemRepository;
     private final OrderMapper orderMapper;
 
-    public CategoryService(CategoryRepository categoryRepo, FoodItemRepository foodItemRepo, OrderMapper orderMapper) {
+    public CategoryService(CategoryRepository categoryRepo, FoodItemRepository foodItemRepo, 
+                           CategoryTranslationRepository categoryTranslationRepo, OrderMapper orderMapper) {
         this.categoryRepository = categoryRepo;
         this.foodItemRepository = foodItemRepo;
+        this.categoryTranslationRepository = categoryTranslationRepo;
         this.orderMapper = orderMapper;
     }
 
@@ -119,5 +128,62 @@ public class CategoryService {
 
         CategoryDto categoryResponse = orderMapper.categoryToCategoryDto(savedCategory);
         return new WarningResponse<>(categoryResponse, failedNames);
+    }
+
+    public List<CategoryTranslationDto> getCategoryTranslations(String name) {
+        Category category = categoryRepository.findByCategoryName(name)
+                .orElseThrow(() -> new NotFoundException("Category", name));
+
+        return orderMapper.categoryTranslationsToCategoryTranslationDtos(
+                new ArrayList<>(category.getTranslations().values())
+        );
+    }
+
+    public CategoryTranslationDto addCategoryTranslation(String name, CategoryTranslationDto translationDto) {
+        Category category = categoryRepository.findByCategoryName(name)
+                .orElseThrow(() -> new NotFoundException("Category", name));
+
+        CategoryTranslation translation = orderMapper.categoryTranslationDtoToCategoryTranslation(translationDto);
+        translation.setCategory(category);
+        categoryTranslationRepository.save(translation);
+
+        return orderMapper.categoryTranslationToCategoryTranslationDto(translation);
+    }
+
+    public boolean deleteCategoryTranslation(String name, String langCode) {
+        Category category = categoryRepository.findByCategoryName(name)
+                .orElseThrow(() -> new NotFoundException("Category", name));
+
+        if (!category.getTranslations().containsKey(langCode)) {
+            throw new InvalidValueException("Category", "language code", langCode);
+        }
+
+        CategoryTranslation translation = category.getTranslations().get(langCode);
+        if (translation == null) {
+            throw new NotFoundException("CategoryTranslation", langCode);
+        }
+        
+        category.getTranslations().remove(langCode);
+        categoryRepository.save(category);
+        return true;
+    }
+
+    public CategoryTranslationDto updateCategoryTranslation(String name, String langCode, 
+                                                            CategoryTranslationDto translationDto) {
+        Category category = categoryRepository.findByCategoryName(name)
+                .orElseThrow(() -> new NotFoundException("Category", name));
+
+        if (!category.getTranslations().containsKey(langCode)) {
+            throw new InvalidValueException("Category", "language code", langCode);
+        }
+
+        CategoryTranslation translation = category.getTranslations().get(langCode);
+        if (translation == null) {
+            throw new NotFoundException("CategoryTranslation", langCode);
+        }
+
+        orderMapper.updateCategoryTranslationFromDto(translationDto, translation);
+        categoryTranslationRepository.save(translation);
+        return orderMapper.categoryTranslationToCategoryTranslationDto(translation);
     }
 }

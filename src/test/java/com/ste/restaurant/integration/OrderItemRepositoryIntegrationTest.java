@@ -384,8 +384,8 @@ class OrderItemRepositoryIntegrationTest {
         @Test
         @DisplayName("Should handle long notes")
         void shouldHandleLongNotes() {
-            // Given - Create a note that's long but within database limits
-            String longNote = "This is a detailed note that describes special preparation instructions. ".repeat(3);
+            // Given - Create a.java note that's long but within database limits
+            String longNote = "This is a.java detailed note that describes special preparation instructions. ".repeat(3);
             OrderItem orderItem = createTestOrderItem(1, longNote);
 
             // When

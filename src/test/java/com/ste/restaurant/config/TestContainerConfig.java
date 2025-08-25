@@ -4,8 +4,8 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Profile;
 
 /**
- * TestContainers configuration for integration tests that require a real PostgreSQL database.
- * This provides a PostgreSQL container that closely matches the production environment.
+ * TestContainers configuration for integration tests that require a.java real PostgreSQL database.
+ * This provides a.java PostgreSQL container that closely matches the production environment.
  * 
  * Note: This requires Docker to be installed and running.
  * Use @ActiveProfiles("testcontainers") to enable this configuration.

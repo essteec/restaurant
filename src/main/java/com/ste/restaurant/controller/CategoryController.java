@@ -2,13 +2,19 @@ package com.ste.restaurant.controller;
 
 import com.ste.restaurant.dto.CategoryDto;
 import com.ste.restaurant.dto.CategoryDtoBasic;
+import com.ste.restaurant.dto.CategoryTranslationDto;
+import com.ste.restaurant.dto.common.StringDto;
 import com.ste.restaurant.dto.common.StringsDto;
 import com.ste.restaurant.dto.common.WarningResponse;
 import com.ste.restaurant.service.CategoryService;
 import jakarta.validation.Valid;
+
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -59,5 +65,33 @@ public class CategoryController {
     @DeleteMapping(path = "/{name}/food-items")
     public WarningResponse<CategoryDto> deleteFoodItemFromCategory(@PathVariable String name, @Valid @RequestBody StringsDto foodNames) {
         return categoryService.removeFoodItemsFromCategory(name, foodNames);
+    }
+
+    // CRUD language
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping(path = "/{name}/languages")  // change language with translation
+    public List<CategoryTranslationDto> getCategoryTranslations(@PathVariable String name) {
+        return categoryService.getCategoryTranslations(name);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping(path = "/{name}/languages")
+    public CategoryTranslationDto addCategoryTranslation(@PathVariable String name, @Valid @RequestBody CategoryTranslationDto translationDto) {
+        return categoryService.addCategoryTranslation(name, translationDto);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping(path = "/{name}/languages/{lang}")
+    public ResponseEntity<Boolean> deleteCategoryTranslation(@PathVariable String name, @PathVariable String lang) {
+        boolean deleted = categoryService.deleteCategoryTranslation(name, lang);
+        return deleted
+                ? ResponseEntity.ok().build()
+                : ResponseEntity.notFound().build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping(path = "/{name}/languages/{lang}")
+    public CategoryTranslationDto updateCategoryTranslation(@PathVariable String name, @PathVariable String lang, @Valid @RequestBody CategoryTranslationDto translationDto) {
+        return categoryService.updateCategoryTranslation(name, lang, translationDto);
     }
 }

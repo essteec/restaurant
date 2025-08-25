@@ -1,6 +1,8 @@
 package com.ste.restaurant.entity;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import jakarta.persistence.*;
@@ -19,6 +21,10 @@ public class Category {
     @Column(nullable = false, unique = true)
     private String categoryName;
 
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @MapKey(name = "languageCode")
+    private Map<String, CategoryTranslation> translations = new HashMap<>();
+
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @ManyToMany
@@ -26,5 +32,10 @@ public class Category {
             joinColumns = @JoinColumn(name = "category_id"),
             inverseJoinColumns = @JoinColumn(name = "food_item_id"))
     private Set<FoodItem> foodItems = new HashSet<>();
+
+    public void addTranslation(CategoryTranslation translation) {
+        translation.setCategory(this);
+        this.translations.put(translation.getLanguageCode(), translation);
+    }
 }
 

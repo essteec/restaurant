@@ -25,7 +25,7 @@ public class AddressService {
     private final OrderRepository orderRepository;
 
     public AddressService(AddressRepository addressRepository, UserRepository userRepository,
-                          OrderRepository orderRepository, OrderMapper orderMapper) {
+                          OrderMapper orderMapper, OrderRepository orderRepository) {
         this.addressRepository = addressRepository;
         this.userRepository = userRepository;
         this.orderMapper = orderMapper;

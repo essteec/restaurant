@@ -1,6 +1,7 @@
 package com.ste.restaurant.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Profile;
 
 import com.google.genai.Client;
 import com.google.genai.types.GenerateContentResponse;
@@ -8,6 +9,7 @@ import com.ste.restaurant.exception.InvalidValueException;
 import org.springframework.cache.annotation.Cacheable;
 
 @Service
+@Profile("!test")
 public class AiService {
 
     private final Client geminiClient;
@@ -17,7 +19,7 @@ public class AiService {
     }
 
     /**
-     * Generates a concise menu description for the given food name using Gemini.
+     * Generates a.java concise menu description for the given food name using Gemini.
      * @param foodName The food name.
      * @return JSON string with the description or empty JSON object if failed.
      */

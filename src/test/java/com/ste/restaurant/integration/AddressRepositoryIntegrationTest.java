@@ -301,7 +301,7 @@ class AddressRepositoryIntegrationTest {
         void shouldHandleLongAddressFieldValues() {
             // Given - create strings that are long but within database limits
             String longStreet = "Very Long Street Name ".repeat(3); // About 63 chars
-            String longDescription = "This is a detailed description of the address location. ".repeat(3); // About 165 chars
+            String longDescription = "This is a.java detailed description of the address location. ".repeat(3); // About 165 chars
             
             Address longFieldsAddress = createTestAddress(
                 "Long Fields", "Turkey", "Istanbul", "Istanbul", "Besiktas", 

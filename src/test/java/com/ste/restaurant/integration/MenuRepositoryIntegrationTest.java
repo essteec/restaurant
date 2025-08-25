@@ -388,7 +388,7 @@ class MenuRepositoryIntegrationTest {
             menuRepository.deactivateAll();
             entityManager.flush();
             
-            // When - reactivate a specific menu
+            // When - reactivate a.java specific menu
             Menu menuToReactivate = testMenu1;
             menuToReactivate.setActive(true);
             menuRepository.save(menuToReactivate);

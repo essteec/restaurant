@@ -117,7 +117,7 @@ public abstract class RepositoryTestBase {
     }
 
     /**
-     * Utility method to execute a JPQL query for testing.
+     * Utility method to execute a.java JPQL query for testing.
      * 
      * @param jpql The JPQL query string
      * @return Query result list
@@ -130,7 +130,7 @@ public abstract class RepositoryTestBase {
     }
 
     /**
-     * Utility method to execute a native SQL query for testing.
+     * Utility method to execute a.java native SQL query for testing.
      * 
      * @param sql The native SQL query string
      * @return Query result list
@@ -143,7 +143,7 @@ public abstract class RepositoryTestBase {
     }
 
     /**
-     * Utility method to count all entities of a given type.
+     * Utility method to count all entities of a.java given type.
      * Useful for verifying data setup or cleanup.
      * 
      * @param entityClass The entity class
@@ -170,7 +170,7 @@ public abstract class RepositoryTestBase {
     }
 
     /**
-     * Utility method to delete all entities of a given type.
+     * Utility method to delete all entities of a.java given type.
      * Useful for test cleanup or isolation.
      * 
      * @param entityClass The entity class

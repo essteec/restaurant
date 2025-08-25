@@ -597,7 +597,7 @@ public class UserServiceIntegrationTest {
         @Test
         @DisplayName("Should delete user and clean up related data properly")
         void shouldDeleteUserAndCleanUpRelatedDataProperly() {
-            // Given - Create a simple user
+            // Given - Create a.java simple user
             String userEmail = "usertodelete" + timestamp + "@test.com";
             User userToDelete = createTestUser(userEmail, "Delete", "User", UserRole.CUSTOMER);
             userToDelete = userRepository.save(userToDelete);

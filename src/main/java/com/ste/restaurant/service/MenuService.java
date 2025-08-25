@@ -5,6 +5,7 @@ import com.ste.restaurant.dto.common.StringsDto;
 import com.ste.restaurant.dto.common.WarningResponse;
 import com.ste.restaurant.entity.Category;
 import com.ste.restaurant.entity.FoodItem;
+import com.ste.restaurant.entity.FoodItemTranslation;
 import com.ste.restaurant.entity.Menu;
 import com.ste.restaurant.exception.AlreadyExistsException;
 import com.ste.restaurant.exception.NotFoundException;
@@ -24,11 +25,14 @@ public class MenuService {
     private final MenuRepository menuRepository;
     private final FoodItemRepository foodItemRepository;
     private final OrderMapper orderMapper;
+    private final LanguageService languageService;
 
-    public MenuService(MenuRepository menuRepo, FoodItemRepository foodItemRepo, OrderMapper orderMapper) {
+    public MenuService(MenuRepository menuRepo, FoodItemRepository foodItemRepo, 
+                       OrderMapper orderMapper, LanguageService languageService) {
         this.menuRepository = menuRepo;
         this.foodItemRepository = foodItemRepo;
         this.orderMapper = orderMapper;
+        this.languageService = languageService;
     }
 
     public MenuDtoBasic saveMenu(MenuDtoBasic menu) {
@@ -107,11 +111,15 @@ public class MenuService {
         return new WarningResponse<>(menuDtos, failedMenuNames);
     }
 
-    public List<CategoryDto> getActiveMenu() {
+    public List<CategoryDto> getActiveMenu(String langCode) {
         List<Menu> menus = menuRepository.findAllByActive(true);
         Set<FoodItem> foodItems = new HashSet<>();
         for (Menu menu : menus) {
             foodItems.addAll(menu.getFoodItems());
+        }
+
+        if (languageService.countDistinctLanguages() > 0 && !languageService.existsByLanguageCode(langCode)) {
+            langCode = "en";  // fallback to English if language is not supported
         }
 
         Map<String, Set<FoodItemDto>> categoryMap = new LinkedHashMap<>();
@@ -119,6 +127,16 @@ public class MenuService {
         for (FoodItem food : foodItems) {
             for (Category category : food.getCategories()) {
                 FoodItemDto foodItemDto = orderMapper.foodItemToFoodItemDto(food);
+
+                FoodItemTranslation translation = food.getTranslations().get(langCode);
+                if (translation != null) {
+                    if (translation.getName() != null) {
+                        foodItemDto.setFoodName(translation.getName());
+                    }
+                    if (translation.getDescription() != null) {
+                        foodItemDto.setDescription(translation.getDescription());
+                    }
+                }
 
                 if (food.getImage() != null) {
                     foodItemDto.setImage("/images/" + food.getImage());

@@ -73,7 +73,7 @@ public class MenuController {
     // by customer // todo get menu that named "website menu" which has 3 exact food for showcase in main page
     @PreAuthorize("permitAll()")
     @GetMapping(path = "/active")
-    public List<CategoryDto> getActiveMenu() {
-        return menuService.getActiveMenu();
+    public List<CategoryDto> getActiveMenu(@RequestHeader(value = "Accept-Language", defaultValue = "en") String langCode) {
+        return menuService.getActiveMenu(langCode);
     }
 }

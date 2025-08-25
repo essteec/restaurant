@@ -2,6 +2,8 @@ package com.ste.restaurant.controller;
 
 import com.ste.restaurant.dto.CategoryDtoBasic;
 import com.ste.restaurant.dto.FoodItemDto;
+import com.ste.restaurant.dto.FoodItemTranslationDto;
+import com.ste.restaurant.entity.FoodItem;
 import com.ste.restaurant.service.FoodItemService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -12,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Set;
 
 @PreAuthorize("hasRole('ADMIN')")
@@ -69,5 +72,29 @@ public class FoodItemController {
         return deleted
                 ? ResponseEntity.ok().build()
                 : ResponseEntity.notFound().build();
+    }
+
+    // CRUD language
+    @GetMapping(path = "/{name}/languages")
+    public List<FoodItemTranslationDto> getFoodItemTranslations(@PathVariable String name) {
+        return foodItemService.getFoodItemTranslations(name);
+    }
+
+    @PostMapping(path = "/{name}/languages")
+    public FoodItemTranslationDto addFoodItemTranslation(@PathVariable String name, @Valid @RequestBody FoodItemTranslationDto translationDto) {
+        return foodItemService.addFoodItemTranslation(name, translationDto);
+    }
+
+    @DeleteMapping(path = "/{name}/languages/{lang}")
+    public ResponseEntity<Boolean> deleteFoodItemTranslation(@PathVariable String name, @PathVariable String lang) {
+        boolean deleted = foodItemService.deleteFoodItemTranslation(name, lang);
+        return deleted
+                ? ResponseEntity.ok().build()
+                : ResponseEntity.notFound().build();
+    }
+
+    @PutMapping(path = "/{name}/languages/{lang}")
+    public FoodItemTranslationDto updateFoodItemTranslation(@PathVariable String name, @PathVariable String lang, @Valid @RequestBody FoodItemTranslationDto translationDto) {
+        return foodItemService.updateFoodItemTranslation(name, lang, translationDto);
     }
 }

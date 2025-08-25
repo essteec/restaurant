@@ -41,7 +41,7 @@ class CategoryServiceTest {
     private CategoryRepository categoryRepository;
 
     @Mock
-    private FoodItemRepository foodItemRepository; // Although not directly used by saveCategory, it's a dependency
+    private FoodItemRepository foodItemRepository; // Although not directly used by saveCategory, it's a.java dependency
 
     @Mock
     private OrderMapper orderMapper;

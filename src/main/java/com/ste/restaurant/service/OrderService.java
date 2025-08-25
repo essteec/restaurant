@@ -17,7 +17,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -73,6 +72,7 @@ public class OrderService {
         return orderMapper.orderToOrderDto(order);
     }
 
+    @Transactional(readOnly = true)
     public OrderDto getOrderById(Long id,  String email) {
         userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User", email));
@@ -86,6 +86,7 @@ public class OrderService {
         return orderMapper.orderToOrderDto(order);
     }
 
+    @Transactional(readOnly = true)
     public List<OrderItemDto> getOrderItemsFromOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order", orderId));
@@ -210,6 +211,7 @@ public class OrderService {
         return new WarningResponse<>(orderDto, failedNames);
     }
 
+    @Transactional(readOnly = true)
     public OrderDto getLastOrder(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User", email));
@@ -313,6 +315,7 @@ public class OrderService {
         return getOrderById(orderId);
     }
 
+    @Transactional(readOnly = true)
     public List<OrderItemDto> getOrderItemsForUser(Long orderId, String email) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order", orderId));
