@@ -1,15 +1,23 @@
 package com.ste.restaurant.repository;
 
 import com.ste.restaurant.entity.CategoryTranslation;
+import com.ste.restaurant.entity.id.CategoryTranslationId;
+
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface CategoryTranslationRepository extends JpaRepository<CategoryTranslation, Long> {
+public interface CategoryTranslationRepository extends JpaRepository<CategoryTranslation, CategoryTranslationId> {
 
-    @Query("SELECT COUNT(DISTINCT t.languageCode) FROM CategoryTranslation t")
+    @Query("SELECT COUNT(DISTINCT t.categoryTranslationId.languageCode) FROM CategoryTranslation t")
     long countDistinctLanguages();
 
-    boolean existsByLanguageCode(String languageCode);
+    // list distinct languages
+    @Query("SELECT DISTINCT t.categoryTranslationId.languageCode AS code FROM CategoryTranslation t")
+    List<String> findDistinctLanguages();
+
+    boolean existsByCategoryTranslationId_LanguageCode(String categoryTranslationIdLanguageCode);
 }

@@ -13,6 +13,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.api.io.TempDir;
+import java.nio.file.Path;
 
 import java.util.*;
 
@@ -32,6 +34,9 @@ class TableTopServiceTest {
 
     @InjectMocks
     private TableTopService tableTopService;
+
+    @TempDir
+    Path tempDir;
 
     private TableTop testTable;
     private TableTopDto testTableDto;
@@ -57,7 +62,7 @@ class TableTopServiceTest {
         testStringDto.setName("OCCUPIED");
 
         org.springframework.test.util.ReflectionTestUtils.setField(tableTopService, "siteBaseUrl", "http://localhost:8080");
-        org.springframework.test.util.ReflectionTestUtils.setField(tableTopService, "qrCodeDir", "qrcodes/");
+        org.springframework.test.util.ReflectionTestUtils.setField(tableTopService, "qrCodeDir", tempDir.toString() + "/");
     }
 
     @Test

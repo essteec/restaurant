@@ -1,5 +1,7 @@
 package com.ste.restaurant.controller;
 
+import java.util.List;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,8 +18,13 @@ public class LanguageController {
         this.languageService = languageService;
     }
 
-    @GetMapping
+    @GetMapping("/supported/count")
     public long getUniqueLanguageCodeCount() {
         return languageService.countDistinctLanguages();
+    }
+
+    @GetMapping("/supported")
+    public List<String> getSupportedLanguages() {
+        return languageService.getSupportedLanguages();
     }
 }

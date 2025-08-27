@@ -21,8 +21,10 @@ public class Category {
     @Column(nullable = false, unique = true)
     private String categoryName;
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @MapKey(name = "languageCode")
+    @MapKey(name = "categoryTranslationId.languageCode")
     private Map<String, CategoryTranslation> translations = new HashMap<>();
 
     @EqualsAndHashCode.Exclude
@@ -32,10 +34,10 @@ public class Category {
             joinColumns = @JoinColumn(name = "category_id"),
             inverseJoinColumns = @JoinColumn(name = "food_item_id"))
     private Set<FoodItem> foodItems = new HashSet<>();
-
-    public void addTranslation(CategoryTranslation translation) {
-        translation.setCategory(this);
-        this.translations.put(translation.getLanguageCode(), translation);
-    }
+//
+//    public void addTranslation(CategoryTranslation translation) {
+//        translation.setCategory(this);
+//        this.translations.put(translation.getCategoryTranslationId().getLanguageCode(), translation);
+//    }
 }
 

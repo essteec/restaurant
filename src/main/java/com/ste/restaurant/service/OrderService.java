@@ -308,7 +308,7 @@ public class OrderService {
         table.setTableStatus(TableStatus.OCCUPIED);
         tableTopRepository.save(table);
 
-        // finally set order with new table
+        // finally, set order with new table
         order.setTable(table);
         orderRepository.save(order);
 

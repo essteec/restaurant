@@ -145,6 +145,7 @@ public class CategoryService {
 
         CategoryTranslation translation = orderMapper.categoryTranslationDtoToCategoryTranslation(translationDto);
         translation.setCategory(category);
+        translation.setId(translationDto.getLanguageCode(), category);
         categoryTranslationRepository.save(translation);
 
         return orderMapper.categoryTranslationToCategoryTranslationDto(translation);

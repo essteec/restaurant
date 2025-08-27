@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,8 +18,8 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
 @AutoConfigureMockMvc
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Transactional
 @ActiveProfiles("test")
 public class AddressControllerIntegrationTest {
@@ -30,9 +31,13 @@ public class AddressControllerIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Nested
-    @SpringBootTest
+    @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
     @AutoConfigureMockMvc
+    @ActiveProfiles("test")
     @Transactional
+    @TestPropertySource(properties = {
+        "spring.datasource.url=jdbc:h2:mem:testdb-${random.uuid};MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false"
+    })
     class CreateAddressTests {
 
         @Test
@@ -147,9 +152,13 @@ public class AddressControllerIntegrationTest {
     }
 
     @Nested
-    @SpringBootTest
+    @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
     @AutoConfigureMockMvc
     @Transactional
+    @ActiveProfiles("test")
+    @TestPropertySource(properties = {
+        "spring.datasource.url=jdbc:h2:mem:testdb-${random.uuid};MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false"
+    })
     class GetAddressesTests {
 
         @Test
@@ -187,9 +196,13 @@ public class AddressControllerIntegrationTest {
     }
 
     @Nested
-    @SpringBootTest
+    @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
     @AutoConfigureMockMvc
     @Transactional
+    @ActiveProfiles("test")
+    @TestPropertySource(properties = {
+        "spring.datasource.url=jdbc:h2:mem:testdb-${random.uuid};MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false"
+    })
     class UpdateAddressTests {
 
         @Test
@@ -284,9 +297,13 @@ public class AddressControllerIntegrationTest {
     }
 
     @Nested
-    @SpringBootTest
+    @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
     @AutoConfigureMockMvc
     @Transactional
+    @ActiveProfiles("test")
+    @TestPropertySource(properties = {
+        "spring.datasource.url=jdbc:h2:mem:testdb-${random.uuid};MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false"
+    })
     class DeleteAddressTests {
 
         @Test
@@ -351,9 +368,13 @@ public class AddressControllerIntegrationTest {
     }
 
     @Nested
-    @SpringBootTest
+    @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
     @AutoConfigureMockMvc
     @Transactional
+    @ActiveProfiles("test")
+    @TestPropertySource(properties = {
+        "spring.datasource.url=jdbc:h2:mem:testdb-${random.uuid};MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false"
+    })
     class AuthenticationTests {
 
         @Test

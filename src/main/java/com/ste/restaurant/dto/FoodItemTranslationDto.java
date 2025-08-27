@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class FoodItemTranslationDto {
     
     @NotBlank
-    @Size(max = 5)
+    @Size(max = 2)
     private String languageCode;
 
     @NotBlank

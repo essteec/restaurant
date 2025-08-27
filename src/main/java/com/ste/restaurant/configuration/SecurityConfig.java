@@ -48,8 +48,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/rest/api/menus/active").permitAll()      // Public: get active menus
                         .requestMatchers(HttpMethod.GET, "/rest/api/categories").permitAll()       // Public get all categories
                         .requestMatchers(HttpMethod.GET, "/rest/api/food-items/*/categories").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/rest/api/languages/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/rest/api/users/*/addresses/**").hasRole("ADMIN")
-                        // .requestMatchers("/qr-codes/**").hasRole("ADMIN")
 
                         // --- DEFAULT RULE ---
                         .anyRequest().authenticated()

@@ -28,17 +28,14 @@ public class FoodItem {
 
     private BigDecimal price;
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @OneToMany(mappedBy = "foodItem", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @MapKey(name = "languageCode")
+    @MapKey(name = "foodItemTranslationId.languageCode")
     private Map<String, FoodItemTranslation> translations = new HashMap<>();
 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @ManyToMany(mappedBy = "foodItems")
     private Set<Category> categories = new HashSet<>();
-
-    public void addTranslation(FoodItemTranslation translation) {
-        translation.setFoodItem(this);
-        this.translations.put(translation.getLanguageCode(), translation);
-    }
 }

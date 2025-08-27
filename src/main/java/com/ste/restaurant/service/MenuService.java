@@ -3,10 +3,7 @@ package com.ste.restaurant.service;
 import com.ste.restaurant.dto.*;
 import com.ste.restaurant.dto.common.StringsDto;
 import com.ste.restaurant.dto.common.WarningResponse;
-import com.ste.restaurant.entity.Category;
-import com.ste.restaurant.entity.FoodItem;
-import com.ste.restaurant.entity.FoodItemTranslation;
-import com.ste.restaurant.entity.Menu;
+import com.ste.restaurant.entity.*;
 import com.ste.restaurant.exception.AlreadyExistsException;
 import com.ste.restaurant.exception.NotFoundException;
 import com.ste.restaurant.exception.NullValueException;
@@ -112,43 +109,74 @@ public class MenuService {
     }
 
     public List<CategoryDto> getActiveMenu(String langCode) {
+        // Fetch active menus
         List<Menu> menus = menuRepository.findAllByActive(true);
-        Set<FoodItem> foodItems = new HashSet<>();
-        for (Menu menu : menus) {
-            foodItems.addAll(menu.getFoodItems());
-        }
 
+        // Validate/fallback language
         if (languageService.countDistinctLanguages() > 0 && !languageService.existsByLanguageCode(langCode)) {
-            langCode = "en";  // fallback to English if language is not supported
+            langCode = "en";
         }
 
+        // Build categories -> foodItems map, deduping foods by ID to avoid cycles and equals/hashCode on entities
         Map<String, Set<FoodItemDto>> categoryMap = new LinkedHashMap<>();
+        Set<Long> seenFoodIds = new HashSet<>();
 
-        for (FoodItem food : foodItems) {
-            for (Category category : food.getCategories()) {
+        for (Menu menu : menus) {
+            if (menu == null || menu.getFoodItems() == null) continue;
+            for (FoodItem food : menu.getFoodItems()) {
+                if (food == null) continue;
+
+                Long fid = food.getFoodId();
+                if (fid != null && !seenFoodIds.add(fid)) {
+                    // already processed this food for another menu
+                    // continue to map to its categories again (food can appear in multiple categories)
+                }
+
+                // map food -> dto with translation overlay
                 FoodItemDto foodItemDto = orderMapper.foodItemToFoodItemDto(food);
 
-                FoodItemTranslation translation = food.getTranslations().get(langCode);
-                if (translation != null) {
-                    if (translation.getName() != null) {
-                        foodItemDto.setFoodName(translation.getName());
-                    }
-                    if (translation.getDescription() != null) {
-                        foodItemDto.setDescription(translation.getDescription());
+                Map<String, FoodItemTranslation> translations = food.getTranslations();
+                if (translations != null) {
+                    FoodItemTranslation tr = translations.get(langCode);
+                    if (tr != null) {
+                        if (tr.getName() != null && !tr.getName().isBlank()) {
+                            foodItemDto.setFoodName(tr.getName());
+                        }
+                        if (tr.getDescription() != null && !tr.getDescription().isBlank()) {
+                            foodItemDto.setDescription(tr.getDescription());
+                        }
                     }
                 }
 
-                if (food.getImage() != null) {
+                if (food.getImage() != null && !food.getImage().isBlank()) {
                     foodItemDto.setImage("/images/" + food.getImage());
                 }
 
-                categoryMap.computeIfAbsent(category.getCategoryName(),
-                        k -> new HashSet<>()).add(foodItemDto);
+                // Place this food into all of its categories
+                Set<Category> categories = food.getCategories();
+                if (categories == null) continue;
+                for (Category category : categories) {
+                    if (category == null) continue;
+                    String catName = category.getCategoryName();
+                    if (catName == null || catName.isBlank()) continue;
+
+                    Map<String, CategoryTranslation> catTrans = category.getTranslations();
+                    if (catTrans != null) {
+                        CategoryTranslation ctr = catTrans.get(langCode);
+                        if (ctr != null) {
+                            if (ctr.getName() != null && !ctr.getName().isBlank()) {
+                                catName = ctr.getName();
+                            }
+                        }
+                    }
+
+                    categoryMap.computeIfAbsent(catName, k -> new HashSet<>()).add(foodItemDto);
+                }
             }
         }
 
         return categoryMap.entrySet().stream()
-                .map(entry -> new CategoryDto(entry.getKey(), entry.getValue()))
+                .map(e -> new CategoryDto(e.getKey(), e.getValue()))
                 .collect(Collectors.toList());
     }
 

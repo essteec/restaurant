@@ -1,8 +1,7 @@
 package com.ste.restaurant.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -23,6 +22,7 @@ public class Menu {
     private boolean active = false;
 
     @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToMany
     @JoinTable(name = "menu_food_item",
             joinColumns = @JoinColumn(name = "menu_id"),

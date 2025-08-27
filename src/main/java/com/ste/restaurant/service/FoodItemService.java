@@ -182,7 +182,8 @@ public class FoodItemService {
                 .orElseThrow(() -> new NotFoundException("Food", name));
 
         FoodItemTranslation translation = orderMapper.foodItemTranslationDtoToFoodItemTranslation(translationDto);
-        translation.setFoodItem(food);
+        translation.setFoodItem(food);  
+        translation.setId(translationDto.getLanguageCode(), food);
         foodItemTranslationRepository.save(translation);
 
         return orderMapper.foodItemTranslationToFoodItemTranslationDto(translation);
