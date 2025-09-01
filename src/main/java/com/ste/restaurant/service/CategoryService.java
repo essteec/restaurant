@@ -187,4 +187,9 @@ public class CategoryService {
         categoryTranslationRepository.save(translation);
         return orderMapper.categoryTranslationToCategoryTranslationDto(translation);
     }
+
+    public Page<CategoryDto> searchCategories(String query, Pageable pageable) {
+        Page<Category> categories = categoryRepository.findAllByCategoryNameContainingIgnoreCase(query, pageable);
+        return categories.map(orderMapper::categoryToCategoryDto);    
+    }
 }

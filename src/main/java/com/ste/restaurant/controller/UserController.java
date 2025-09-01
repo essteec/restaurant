@@ -53,13 +53,13 @@ public class UserController {
     }
 
     @PutMapping(path = "/{id}")
-    public UserDto updateUserById(@PathVariable Long id, @Valid @RequestBody UserDtoEmployee userDto) {
-        return userService.updateUserById(id, userDto);
+    public UserDto updateUserById(@PathVariable Long id, @Valid @RequestBody UserDtoEmployee userDto, Authentication auth) {
+        return userService.updateUserById(id, userDto, auth.getName());
     }
 
     @PatchMapping(path = "/{id}/role")
-    public UserDto updateUserRoleById(@PathVariable Long id, @Valid @RequestBody StringDto role) {
-        return userService.updateUserRoleById(id, role);
+    public UserDto updateUserRoleById(@PathVariable Long id, @Valid @RequestBody StringDto role, Authentication auth) {
+        return userService.updateUserRoleById(id, role, auth.getName());
     }
 
     @PatchMapping(path = "/{id}/salary")
@@ -111,4 +111,8 @@ public class UserController {
         return userService.changePassword(auth.getName(), passwordData);
     }
 
+    @GetMapping(path = "/search")
+    public Page<UserDto> searchUsers(@RequestParam String query, @PageableDefault(size = 20) Pageable pageable) {
+        return userService.searchUsers(query, pageable);
+    }
 }

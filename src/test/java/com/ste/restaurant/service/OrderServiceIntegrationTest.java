@@ -4,6 +4,9 @@ import com.ste.restaurant.dto.*;
 import com.ste.restaurant.dto.common.StringDto;
 import com.ste.restaurant.dto.common.WarningResponse;
 import com.ste.restaurant.entity.*;
+import com.ste.restaurant.entity.enums.OrderStatus;
+import com.ste.restaurant.entity.enums.TableStatus;
+import com.ste.restaurant.entity.enums.UserRole;
 import com.ste.restaurant.exception.*;
 import com.ste.restaurant.repository.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,6 +63,9 @@ public class OrderServiceIntegrationTest {
     
     @Autowired
     private FoodItemRepository foodItemRepository;
+
+    @Autowired
+    private MenuRepository menuRepository;
     
     @Autowired
     private TableTopRepository tableTopRepository;
@@ -91,6 +97,7 @@ public class OrderServiceIntegrationTest {
         setupTestFoodItems();
         setupTestTable();
         setupTestAddress();
+        setupTestMenu();
         setupTestOrder();
     }
 
@@ -809,6 +816,14 @@ public class OrderServiceIntegrationTest {
     private void setupTestOrder() {
         testOrder = createTestOrderForTableAndCustomer(testCustomer, testTable);
         orderRepository.save(testOrder);
+    }
+
+    private void setupTestMenu() {
+        Menu menu = new Menu();
+        menu.setMenuName("Test Menu " + timestamp);
+        menu.setActive(true);
+        menu.setFoodItems(new HashSet<>(Arrays.asList(testFood1, testFood2, testFood3)));
+        menuRepository.save(menu);
     }
 
     private User createTestUser(String email, String firstName, String lastName, UserRole role) {

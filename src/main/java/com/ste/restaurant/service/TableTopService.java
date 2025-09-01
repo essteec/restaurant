@@ -3,7 +3,7 @@ package com.ste.restaurant.service;
 import com.ste.restaurant.dto.common.StringDto;
 import com.ste.restaurant.dto.TableTopDto;
 import com.ste.restaurant.dto.TableTopDtoQr;
-import com.ste.restaurant.entity.TableStatus;
+import com.ste.restaurant.entity.enums.TableStatus;
 import com.ste.restaurant.entity.TableTop;
 import com.ste.restaurant.exception.*;
 import com.ste.restaurant.mapper.OrderMapper;

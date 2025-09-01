@@ -37,19 +37,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
 
-        // swagger exclude
-        String path = request.getServletPath();
-        if (
-                path.startsWith("/rest/api/auth") ||
-                        path.startsWith("/v3/api-docs") ||
-                        path.startsWith("/swagger-ui") ||
-                        path.equals("/swagger-ui.html")
-        ) {
-            filterChain.doFilter(request, response); // Skip JWT check
-            return;
-        }
-
-
         String username = null;
         String jwtToken = null;
 
@@ -87,6 +74,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getServletPath();
-        return path.startsWith("/rest/api/auth") || path.startsWith("/rest/api/init");
+        // Do not apply JWT filter to anything that is not an API call.
+        // This allows SPA routing and static assets to be handled by other parts of Spring Security.
+        return !path.startsWith("/rest/api");
     }
 }

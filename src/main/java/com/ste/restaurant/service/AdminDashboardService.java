@@ -2,6 +2,7 @@ package com.ste.restaurant.service;
 
 import com.ste.restaurant.dto.dashboard.*;
 import com.ste.restaurant.entity.*;
+import com.ste.restaurant.entity.enums.OrderStatus;
 import com.ste.restaurant.repository.OrderRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -97,7 +98,7 @@ public class AdminDashboardService {
         return revenueDataPoints;
     }
 
-    public Page<TopPerformingItemDto> getTopPerformingItems(LocalDate startDate, LocalDate endDate, Pageable pageable) {
+    public List<TopPerformingItemDto> getTopPerformingItems(LocalDate startDate, LocalDate endDate) {
         // Get ALL orders in the date range to calculate accurate top performers
         List<Order>  orders = orderRepository.findAllByStatusAndOrderTimeBetween(
                 OrderStatus.COMPLETED,
@@ -120,10 +121,10 @@ public class AdminDashboardService {
         topPerformingItems.sort(Comparator.comparing(
                 TopPerformingItemDto::getTotalRevenue).reversed());
 
-        return ServiceUtil.createPage(topPerformingItems, pageable);
+        return topPerformingItems;
     }
 
-    public Page<TopPerformingCategoryDto> getTopPerformingCategories(LocalDate startDate, LocalDate endDate, Pageable pageable) {
+    public List<TopPerformingCategoryDto> getTopPerformingCategories(LocalDate startDate, LocalDate endDate) {
         // Get ALL orders in the date range to calculate accurate top performers
         List<Order> orders = orderRepository.findAllByStatusAndOrderTimeBetween(
                 OrderStatus.COMPLETED,
@@ -162,10 +163,10 @@ public class AdminDashboardService {
         }
         topPerformingCategories.sort(Comparator.comparing(TopPerformingCategoryDto::getTotalRevenue).reversed());
 
-        return ServiceUtil.createPage(topPerformingCategories, pageable);
+        return topPerformingCategories;
     }
 
-    public Page<BusiestTableDto> getBusiestTables(LocalDate startDate, LocalDate endDate, Pageable pageable) {
+    public List<BusiestTableDto> getBusiestTables(LocalDate startDate, LocalDate endDate) {
         // Get ALL orders in the date range to calculate accurate busiest tables
         List<Order> orders = orderRepository.findAllByStatusAndOrderTimeBetween(
                 OrderStatus.COMPLETED,
@@ -187,7 +188,7 @@ public class AdminDashboardService {
         }
         busiestTables.sort(Comparator.comparing(BusiestTableDto::getOrderCount).reversed());
 
-        return ServiceUtil.createPage(busiestTables, pageable);
+        return busiestTables;
     }
 
     public List<RevenueHeatmapPointDto> getRevenueHeatmap(LocalDate startDate, LocalDate endDate) {

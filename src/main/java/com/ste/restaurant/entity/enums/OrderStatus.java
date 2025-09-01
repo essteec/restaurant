@@ -1,4 +1,4 @@
-package com.ste.restaurant.entity;
+package com.ste.restaurant.entity.enums;
 
 public enum OrderStatus {
     PLACED,

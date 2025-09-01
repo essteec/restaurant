@@ -94,4 +94,10 @@ public class CategoryController {
     public CategoryTranslationDto updateCategoryTranslation(@PathVariable String name, @PathVariable String lang, @Valid @RequestBody CategoryTranslationDto translationDto) {
         return categoryService.updateCategoryTranslation(name, lang, translationDto);
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping(path = "/search")
+    public Page<CategoryDto> searchCategories(@RequestParam String query, @PageableDefault(size = 24) Pageable pageable) {
+        return categoryService.searchCategories(query, pageable);
+    }
 }

@@ -2,7 +2,7 @@ package com.ste.restaurant.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ste.restaurant.dto.CallRequestDtoBasic;
-import com.ste.restaurant.entity.RequestType;
+import com.ste.restaurant.entity.enums.RequestType;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -3,7 +3,7 @@ package com.ste.restaurant.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ste.restaurant.dto.TableTopDto;
 import com.ste.restaurant.dto.common.StringDto;
-import com.ste.restaurant.entity.TableStatus;
+import com.ste.restaurant.entity.enums.TableStatus;
 import com.ste.restaurant.service.TableTopService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

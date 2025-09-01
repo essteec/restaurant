@@ -1,7 +1,7 @@
 package com.ste.restaurant.dto;
 
 import com.ste.restaurant.dto.userdto.UserDto;
-import com.ste.restaurant.entity.RequestType;
+import com.ste.restaurant.entity.enums.RequestType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

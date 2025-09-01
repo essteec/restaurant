@@ -24,6 +24,7 @@ public interface OrderMapper {
     Set<CategoryDtoBasic> categoriesToCategoryDtoBasics(Set<Category> categories);
     
     CategoryTranslation categoryTranslationDtoToCategoryTranslation(CategoryTranslationDto translationDto);
+    @Mapping(target = "languageCode", source = "categoryTranslationId.languageCode")
     CategoryTranslationDto categoryTranslationToCategoryTranslationDto(CategoryTranslation translation);
     List<CategoryTranslationDto> categoryTranslationsToCategoryTranslationDtos(List<CategoryTranslation> translations);
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -31,8 +32,11 @@ public interface OrderMapper {
 
     FoodItem foodItemDtoToFoodItem(FoodItemDto foodItemDto);
     FoodItemDto foodItemToFoodItemDto(FoodItem foodItem);
+    List<FoodItemDto> foodItemsToFoodItemDtos(List<FoodItem> foodItems);
+    FoodItemMenuDto foodItemToFoodItemMenuDto(FoodItem food);
 
     FoodItemTranslation foodItemTranslationDtoToFoodItemTranslation(FoodItemTranslationDto foodItemTranslationDto);
+    @Mapping(target = "languageCode", source = "foodItemTranslationId.languageCode")
     FoodItemTranslationDto foodItemTranslationToFoodItemTranslationDto(FoodItemTranslation foodItemTranslation);
     List<FoodItemTranslationDto> foodItemTranslationsToFoodItemTranslationDtos(List<FoodItemTranslation> translations);
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -45,7 +49,7 @@ public interface OrderMapper {
 
     TableTopDto tableTopToTableTopDto(TableTop tableTop);
     List<TableTopDto> tableTopsToTableTopDtos(List<TableTop> tableTops);
-    
+
     CallRequest callRequestDtoBasicToCallRequest(CallRequestDtoBasic callRequestDtoBasic);
     CallRequestDto callRequestToCallRequestDto(CallRequest callRequest);
 
@@ -54,7 +58,6 @@ public interface OrderMapper {
     OrderItem orderItemDtoBasicToOrderItem(OrderItemDtoBasic orderItemDto);
     OrderItemDto orderItemToOrderItemDto(OrderItem orderItem);
     List<OrderItemDto> orderItemsToOrderItemDtos(List<OrderItem> orderItems);
-
     Menu menuDtoBasicToMenu(MenuDtoBasic menuDtoBasic);
     MenuDto menuToMenuDto(Menu menu);
     MenuDtoBasic menuToMenuDtoBasic(Menu savedMenu);

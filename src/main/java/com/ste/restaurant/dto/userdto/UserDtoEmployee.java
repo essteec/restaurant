@@ -1,6 +1,6 @@
 package com.ste.restaurant.dto.userdto;
 
-import com.ste.restaurant.entity.UserRole;
+import com.ste.restaurant.entity.enums.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

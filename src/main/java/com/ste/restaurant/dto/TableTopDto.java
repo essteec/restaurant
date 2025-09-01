@@ -1,6 +1,6 @@
 package com.ste.restaurant.dto;
 
-import com.ste.restaurant.entity.TableStatus;
+import com.ste.restaurant.entity.enums.TableStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;

@@ -1,7 +1,7 @@
 package com.ste.restaurant.repository;
 
 import com.ste.restaurant.entity.CallRequest;
-import com.ste.restaurant.entity.RequestType;
+import com.ste.restaurant.entity.enums.RequestType;
 import com.ste.restaurant.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

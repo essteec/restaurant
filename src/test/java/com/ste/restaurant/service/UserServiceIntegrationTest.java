@@ -4,6 +4,7 @@ import com.ste.restaurant.dto.common.BigDecimalDto;
 import com.ste.restaurant.dto.common.StringDto;
 import com.ste.restaurant.dto.userdto.*;
 import com.ste.restaurant.entity.*;
+import com.ste.restaurant.entity.enums.UserRole;
 import com.ste.restaurant.exception.*;
 import com.ste.restaurant.repository.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -229,7 +230,7 @@ public class UserServiceIntegrationTest {
             updateDto.setBirthday(LocalDate.of(1985, 12, 25));
             
             // When
-            UserDto updatedUser = userService.updateUserById(testCustomer.getUserId(), updateDto);
+            UserDto updatedUser = userService.updateUserById(testCustomer.getUserId(), updateDto, testAdmin.getEmail());
             
             // Then
             assertThat(updatedUser.getFirstName()).isEqualTo("UpdatedFirst");
@@ -253,7 +254,7 @@ public class UserServiceIntegrationTest {
             updateDto.setEmail(newEmail);
 
             // When
-            UserDto updatedUser = userService.updateUserById(testCustomer.getUserId(), updateDto);
+            UserDto updatedUser = userService.updateUserById(testCustomer.getUserId(), updateDto, testAdmin.getEmail());
             
             // Then
             assertThat(updatedUser.getEmail()).isEqualTo(newEmail);
@@ -270,7 +271,7 @@ public class UserServiceIntegrationTest {
             updateDto.setEmail(testWaiter.getEmail()); // Use existing email
             
             // When & Then
-            assertThatThrownBy(() -> userService.updateUserById(testCustomer.getUserId(), updateDto))
+            assertThatThrownBy(() -> userService.updateUserById(testCustomer.getUserId(), updateDto, testAdmin.getEmail()))
                     .isInstanceOf(AlreadyExistsException.class)
                     .hasMessageContaining("User already exists");
         }
@@ -287,12 +288,25 @@ public class UserServiceIntegrationTest {
             String originalPassword = testCustomer.getPassword();
             
             // When
-            userService.updateUserById(testCustomer.getUserId(), updateDto);
+            userService.updateUserById(testCustomer.getUserId(), updateDto, testAdmin.getEmail());
             
             // Then
             User dbUser = userRepository.findById(testCustomer.getUserId()).orElseThrow();
             assertThat(dbUser.getPassword()).isEqualTo(originalPassword); // Password should not change
             assertThat(dbUser.getFirstName()).isEqualTo("UpdatedName");
+        }
+
+        @Test
+        @DisplayName("Should throw exception when updating own info")
+        void shouldThrowExceptionWhenUpdatingOwnInfo() {
+            // Given
+            UserDtoEmployee updateDto = new UserDtoEmployee();
+            updateDto.setFirstName("UpdatedFirst");
+            
+            // When & Then
+            assertThatThrownBy(() -> userService.updateUserById(testAdmin.getUserId(), updateDto, testAdmin.getEmail()))
+                    .isInstanceOf(InvalidOperationException.class)
+                    .hasMessageContaining("Cannot update own information");
         }
     }
 
@@ -308,7 +322,7 @@ public class UserServiceIntegrationTest {
             roleDto.setName("WAITER");
             
             // When
-            UserDto updatedUser = userService.updateUserRoleById(testCustomer.getUserId(), roleDto);
+            UserDto updatedUser = userService.updateUserRoleById(testCustomer.getUserId(), roleDto, testAdmin.getEmail());
             
             // Then
             assertThat(updatedUser.getRole()).isEqualTo(UserRole.WAITER);
@@ -328,7 +342,7 @@ public class UserServiceIntegrationTest {
             roleDto.setName("CUSTOMER");
             
             // When
-            UserDto updatedUser = userService.updateUserRoleById(testWaiter.getUserId(), roleDto);
+            UserDto updatedUser = userService.updateUserRoleById(testWaiter.getUserId(), roleDto, testAdmin.getEmail());
             
             // Then
             assertThat(updatedUser.getRole()).isEqualTo(UserRole.CUSTOMER);
@@ -346,7 +360,7 @@ public class UserServiceIntegrationTest {
             roleDto.setName("INVALID_ROLE");
             
             // When & Then
-            assertThatThrownBy(() -> userService.updateUserRoleById(testCustomer.getUserId(), roleDto))
+            assertThatThrownBy(() -> userService.updateUserRoleById(testCustomer.getUserId(), roleDto, testAdmin.getEmail()))
                     .isInstanceOf(InvalidValueException.class)
                     .hasMessageContaining("INVALID_ROLE");
         }
@@ -359,7 +373,7 @@ public class UserServiceIntegrationTest {
             roleDto.setName("CUSTOMER");
             
             // When & Then
-            assertThatThrownBy(() -> userService.updateUserRoleById(testCustomer.getUserId(), roleDto))
+            assertThatThrownBy(() -> userService.updateUserRoleById(testCustomer.getUserId(), roleDto, testAdmin.getEmail()))
                     .isInstanceOf(AlreadyHasException.class)
                     .hasMessageContaining("CUSTOMER");
         }
@@ -372,9 +386,22 @@ public class UserServiceIntegrationTest {
             roleDto.setName(null);
             
             // When & Then
-            assertThatThrownBy(() -> userService.updateUserRoleById(testCustomer.getUserId(), roleDto))
+            assertThatThrownBy(() -> userService.updateUserRoleById(testCustomer.getUserId(), roleDto, testAdmin.getEmail()))
                     .isInstanceOf(NullValueException.class)
                     .hasMessageContaining("role");
+        }
+
+        @Test
+        @DisplayName("Should throw exception when updating own role")
+        void shouldThrowExceptionWhenUpdatingOwnRole() {
+            // Given
+            StringDto roleDto = new StringDto();
+            roleDto.setName("ADMIN");
+            
+            // When & Then
+            assertThatThrownBy(() -> userService.updateUserRoleById(testAdmin.getUserId(), roleDto, testAdmin.getEmail()))
+                    .isInstanceOf(InvalidOperationException.class)
+                    .hasMessageContaining("Cannot change own role");
         }
     }
 

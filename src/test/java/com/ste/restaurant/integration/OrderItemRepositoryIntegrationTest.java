@@ -1,6 +1,9 @@
 package com.ste.restaurant.integration;
 
 import com.ste.restaurant.entity.*;
+import com.ste.restaurant.entity.enums.OrderStatus;
+import com.ste.restaurant.entity.enums.TableStatus;
+import com.ste.restaurant.entity.enums.UserRole;
 import com.ste.restaurant.repository.OrderItemRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

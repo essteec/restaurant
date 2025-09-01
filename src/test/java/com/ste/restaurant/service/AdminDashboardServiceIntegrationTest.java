@@ -2,6 +2,9 @@ package com.ste.restaurant.service;
 
 import com.ste.restaurant.dto.dashboard.*;
 import com.ste.restaurant.entity.*;
+import com.ste.restaurant.entity.enums.OrderStatus;
+import com.ste.restaurant.entity.enums.TableStatus;
+import com.ste.restaurant.entity.enums.UserRole;
 import com.ste.restaurant.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -211,49 +214,22 @@ public class AdminDashboardServiceIntegrationTest {
         @DisplayName("Should rank items by revenue correctly with real aggregation")
         void shouldRankItemsByRevenueCorrectlyWithRealAggregation() {
             // When
-            Pageable pageable = PageRequest.of(0, 10);
-            Page<TopPerformingItemDto> topItems = adminDashboardService.getTopPerformingItems(testStartDate, testEndDate, pageable);
+            List<TopPerformingItemDto> topItems = adminDashboardService.getTopPerformingItems(testStartDate, testEndDate);
             
             // Then
-            assertThat(topItems.getContent()).isNotEmpty();
+            assertThat(topItems).isNotEmpty();
             
             // Verify items are sorted by revenue (descending)
-            List<TopPerformingItemDto> items = topItems.getContent();
-            for (int i = 1; i < items.size(); i++) {
-                BigDecimal previousRevenue = items.get(i - 1).getTotalRevenue();
-                BigDecimal currentRevenue = items.get(i).getTotalRevenue();
+            for (int i = 1; i < topItems.size(); i++) {
+                BigDecimal previousRevenue = topItems.get(i - 1).getTotalRevenue();
+                BigDecimal currentRevenue = topItems.get(i).getTotalRevenue();
                 assertThat(previousRevenue.compareTo(currentRevenue)).isGreaterThanOrEqualTo(0);
             }
             
             // Verify quantities and revenues are consistent
-            for (TopPerformingItemDto item : items) {
+            for (TopPerformingItemDto item : topItems) {
                 assertThat(item.getQuantitySold()).isGreaterThan(0);
                 assertThat(item.getTotalRevenue()).isGreaterThan(BigDecimal.ZERO);
-            }
-        }
-
-        @Test
-        @DisplayName("Should handle pagination correctly for top items")
-        void shouldHandlePaginationCorrectlyForTopItems() {
-            // When
-            Pageable firstPage = PageRequest.of(0, 2);
-            Pageable secondPage = PageRequest.of(1, 2);
-            
-            Page<TopPerformingItemDto> page1 = adminDashboardService.getTopPerformingItems(testStartDate, testEndDate, firstPage);
-            Page<TopPerformingItemDto> page2 = adminDashboardService.getTopPerformingItems(testStartDate, testEndDate, secondPage);
-            
-            // Then
-            assertThat(page1.getNumber()).isZero();
-            assertThat(page2.getNumber()).isEqualTo(1);
-            
-            if (page1.hasContent() && page2.hasContent()) {
-                // Verify no overlap between pages
-                Set<String> page1Items = Set.of(page1.getContent().stream()
-                        .map(TopPerformingItemDto::getFoodName).toArray(String[]::new));
-                Set<String> page2Items = Set.of(page2.getContent().stream()
-                        .map(TopPerformingItemDto::getFoodName).toArray(String[]::new));
-                
-                assertThat(page1Items).doesNotContainAnyElementsOf(page2Items);
             }
         }
     }
@@ -266,22 +242,20 @@ public class AdminDashboardServiceIntegrationTest {
         @DisplayName("Should calculate category revenue with proper distribution")
         void shouldCalculateCategoryRevenueWithProperDistribution() {
             // When
-            Pageable pageable = PageRequest.of(0, 10);
-            Page<TopPerformingCategoryDto> topCategories = adminDashboardService.getTopPerformingCategories(testStartDate, testEndDate, pageable);
+            List<TopPerformingCategoryDto> topCategories = adminDashboardService.getTopPerformingCategories(testStartDate, testEndDate);
             
             // Then
-            assertThat(topCategories.getContent()).isNotEmpty();
+            assertThat(topCategories).isNotEmpty();
             
             // Verify categories are sorted by revenue (descending)
-            List<TopPerformingCategoryDto> categories = topCategories.getContent();
-            for (int i = 1; i < categories.size(); i++) {
-                BigDecimal previousRevenue = categories.get(i - 1).getTotalRevenue();
-                BigDecimal currentRevenue = categories.get(i).getTotalRevenue();
+            for (int i = 1; i < topCategories.size(); i++) {
+                BigDecimal previousRevenue = topCategories.get(i - 1).getTotalRevenue();
+                BigDecimal currentRevenue = topCategories.get(i).getTotalRevenue();
                 assertThat(previousRevenue.compareTo(currentRevenue)).isGreaterThanOrEqualTo(0);
             }
             
             // Verify all revenues are positive
-            assertThat(categories).allMatch(category -> category.getTotalRevenue().compareTo(BigDecimal.ZERO) > 0);
+            assertThat(topCategories).allMatch(category -> category.getTotalRevenue().compareTo(BigDecimal.ZERO) > 0);
         }
 
         @Test
@@ -300,11 +274,10 @@ public class AdminDashboardServiceIntegrationTest {
             orderRepository.save(uncategorizedOrder);
             
             // When
-            Pageable pageable = PageRequest.of(0, 10);
-            Page<TopPerformingCategoryDto> topCategories = adminDashboardService.getTopPerformingCategories(testStartDate, testEndDate, pageable);
+            List<TopPerformingCategoryDto> topCategories = adminDashboardService.getTopPerformingCategories(testStartDate, testEndDate);
             
             // Then
-            List<String> categoryNames = topCategories.getContent().stream()
+            List<String> categoryNames = topCategories.stream()
                     .map(TopPerformingCategoryDto::getCategoryName)
                     .toList();
             assertThat(categoryNames).contains("Uncategorized");
@@ -319,22 +292,20 @@ public class AdminDashboardServiceIntegrationTest {
         @DisplayName("Should rank tables by order count accurately")
         void shouldRankTablesByOrderCountAccurately() {
             // When
-            Pageable pageable = PageRequest.of(0, 10);
-            Page<BusiestTableDto> busiestTables = adminDashboardService.getBusiestTables(testStartDate, testEndDate, pageable);
+            List<BusiestTableDto> busiestTables = adminDashboardService.getBusiestTables(testStartDate, testEndDate);
             
             // Then
-            assertThat(busiestTables.getContent()).isNotEmpty();
+            assertThat(busiestTables).isNotEmpty();
             
             // Verify tables are sorted by order count (descending)
-            List<BusiestTableDto> tables = busiestTables.getContent();
-            for (int i = 1; i < tables.size(); i++) {
-                Long previousCount = tables.get(i - 1).getOrderCount();
-                Long currentCount = tables.get(i).getOrderCount();
+            for (int i = 1; i < busiestTables.size(); i++) {
+                Long previousCount = busiestTables.get(i - 1).getOrderCount();
+                Long currentCount = busiestTables.get(i).getOrderCount();
                 assertThat(previousCount).isGreaterThanOrEqualTo(currentCount);
             }
             
             // Verify all counts are positive
-            assertThat(tables).allMatch(table -> table.getOrderCount() > 0);
+            assertThat(busiestTables).allMatch(table -> table.getOrderCount() > 0);
         }
     }
 

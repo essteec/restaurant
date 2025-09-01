@@ -4,6 +4,7 @@ import com.ste.restaurant.dto.common.BigDecimalDto;
 import com.ste.restaurant.dto.common.StringDto;
 import com.ste.restaurant.dto.userdto.*;
 import com.ste.restaurant.entity.*;
+import com.ste.restaurant.entity.enums.UserRole;
 import com.ste.restaurant.exception.*;
 import com.ste.restaurant.mapper.OrderMapper;
 import com.ste.restaurant.repository.AddressRepository;
@@ -92,9 +93,13 @@ public class UserService {
     }
 
     @Transactional
-    public UserDto updateUserById(Long id, UserDtoEmployee userDto) {
+    public UserDto updateUserById(Long id, UserDtoEmployee userDto, String currentUserEmail) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User", id));
+
+        if (user.getEmail().equals(currentUserEmail)) {
+            throw new InvalidOperationException("User", "Cannot update own information");
+        }
 
         if (userDto.getEmail() != null && !userDto.getEmail().equals(user.getEmail())) {
             if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
@@ -108,7 +113,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserDto updateUserRoleById(Long id, StringDto roleDto) {
+    public UserDto updateUserRoleById(Long id, StringDto roleDto, String currentUserEmail) {
         if (roleDto.getName() == null) {
             throw new NullValueException("User", "role");
         }
@@ -116,6 +121,10 @@ public class UserService {
 
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User", id));
+
+        if (user.getEmail().equals(currentUserEmail)) {
+            throw new InvalidOperationException("User", "Cannot change own role");
+        }
 
         UserRole newRole;
         try {
@@ -215,5 +224,10 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(newPassword));
         User savedUser = userRepository.save(user);
         return orderMapper.userToUserDtoCustomer(savedUser);
+    }
+
+    public Page<UserDto> searchUsers(String query, Pageable pageable) {
+        Page<User> users = userRepository.findAllByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainingIgnoreCase(query, query, query, pageable);
+        return users.map(orderMapper::userToUserDto);
     }
 }

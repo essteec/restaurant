@@ -4,6 +4,9 @@ import com.ste.restaurant.dto.*;
 import com.ste.restaurant.dto.common.StringDto;
 import com.ste.restaurant.dto.common.WarningResponse;
 import com.ste.restaurant.entity.*;
+import com.ste.restaurant.entity.enums.OrderStatus;
+import com.ste.restaurant.entity.enums.TableStatus;
+import com.ste.restaurant.entity.enums.UserRole;
 import com.ste.restaurant.exception.*;
 import com.ste.restaurant.mapper.OrderMapper;
 import com.ste.restaurant.repository.*;
@@ -17,6 +20,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class OrderService {
@@ -24,17 +28,19 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final FoodItemRepository foodItemRepository;
+    private final MenuRepository menuRepository;
     private final UserRepository userRepository;
     private final TableTopRepository tableTopRepository;
     private final AddressRepository addressRepository;
     private final OrderMapper orderMapper;
 
     public OrderService(OrderRepository orderRepo, OrderItemRepository orderItemRepo,
-                        FoodItemRepository foodItemRepo, UserRepository userRepo,
+                        FoodItemRepository foodItemRepo, MenuRepository menuRepo, UserRepository userRepo,
                         TableTopRepository tableTopRepo, AddressRepository addressRepo, OrderMapper orderMapper) {
         this.orderRepository = orderRepo;
         this.orderItemRepository = orderItemRepo;
         this.foodItemRepository = foodItemRepo;
+        this.menuRepository = menuRepo;
         this.userRepository = userRepo;
         this.tableTopRepository = tableTopRepo;
         this.addressRepository = addressRepo;
@@ -130,8 +136,8 @@ public class OrderService {
         order.setStatus(newStatus);
         orderRepository.save(order);
 
-        if (newStatus == OrderStatus.COMPLETED) {
-            order.getTable().setTableStatus(TableStatus.AVAILABLE);
+        if (order.getTable() != null && newStatus == OrderStatus.COMPLETED) {
+            order.getTable().setTableStatus(TableStatus.DIRTY);
             tableTopRepository.save(order.getTable());
         }
         if (newStatus.equals(OrderStatus.DELIVERED)) {
@@ -181,7 +187,7 @@ public class OrderService {
         for (OrderItemDtoBasic orderItemDto : placingDto.getOrderItems()) {
             FoodItem foodItem = foodItemRepository.findByFoodName(orderItemDto.getFoodName())
                     .orElse(null);
-            if (foodItem == null) {
+            if (foodItem == null || !menuRepository.existsByActiveAndFoodItemsContains(true, Set.of(foodItem))) {
                 failedNames.add(orderItemDto.getFoodName());
                 continue;
             }

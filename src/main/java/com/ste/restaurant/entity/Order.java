@@ -1,5 +1,6 @@
 package com.ste.restaurant.entity;
 
+import com.ste.restaurant.entity.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

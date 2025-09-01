@@ -23,4 +23,8 @@ public interface FoodItemTranslationRepository extends JpaRepository<FoodItemTra
     List<String> findDistinctLanguages();
 
     boolean existsByFoodItemTranslationId_LanguageCode(String foodItemTranslationIdLanguageCode);
+
+    boolean existsByFoodItemTranslationId_FoodItemIdAndFoodItemTranslationId_LanguageCode(Long foodItemTranslationIdFoodItemId, String foodItemTranslationIdLanguageCode);
+
+    List<FoodItemTranslation> findByFoodItemTranslationId_LanguageCode(String foodItemTranslationIdLanguageCode);
 }

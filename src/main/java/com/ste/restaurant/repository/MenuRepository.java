@@ -21,9 +21,9 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
 
     List<Menu> findAllByActiveAndFoodItemsIsContaining(boolean active, Set<FoodItem> foodItems);
 
-    List<Menu> findAllByActiveAndFoodItemsContains(boolean b, Set<String> strings);
-
     @Modifying
     @Query("UPDATE Menu m SET m.active = false WHERE m.active = true")
     void deactivateAll();
+
+    boolean existsByActiveAndFoodItemsContains(boolean active, Set<FoodItem> foodItems);
 }

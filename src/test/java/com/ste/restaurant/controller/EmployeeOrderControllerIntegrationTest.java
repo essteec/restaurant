@@ -5,7 +5,6 @@ import com.ste.restaurant.dto.OrderDto;
 import com.ste.restaurant.dto.OrderItemDto;
 import com.ste.restaurant.dto.FoodItemDto;
 import com.ste.restaurant.dto.common.StringDto;
-import com.ste.restaurant.entity.OrderStatus;
 import com.ste.restaurant.service.OrderService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

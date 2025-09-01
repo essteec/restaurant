@@ -2,6 +2,7 @@ package com.ste.restaurant.service;
 
 import com.ste.restaurant.dto.dashboard.*;
 import com.ste.restaurant.entity.*;
+import com.ste.restaurant.entity.enums.OrderStatus;
 import com.ste.restaurant.repository.OrderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,13 +11,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.LocalDateTime;
@@ -323,15 +322,15 @@ class AdminDashboardServiceTest {
         )).thenReturn(completedOrders);
 
         // Act
-        Page<TopPerformingItemDto> resultPage = adminDashboardService.getTopPerformingItems(startDate, endDate, pageable);
+        List<TopPerformingItemDto> resultList = adminDashboardService.getTopPerformingItems(startDate, endDate);
 
         // Assert
-        assertNotNull(resultPage);
-        assertEquals(2, resultPage.getTotalElements()); // Pizza and Pasta
-        assertEquals("Pizza", resultPage.getContent().get(0).getFoodName()); // Corrected expected order
-        assertEquals(0, new BigDecimal("20.00").compareTo(resultPage.getContent().get(0).getTotalRevenue())); // Corrected BigDecimal comparison
-        assertEquals("Pasta", resultPage.getContent().get(1).getFoodName());
-        assertEquals(0, new BigDecimal("15.00").compareTo(resultPage.getContent().get(1).getTotalRevenue())); // Corrected BigDecimal comparison
+        assertNotNull(resultList);
+        assertEquals(2, resultList.size()); // Pizza and Pasta
+        assertEquals("Pizza", resultList.get(0).getFoodName()); // Corrected expected order
+        assertEquals(0, new BigDecimal("20.00").compareTo(resultList.get(0).getTotalRevenue())); // Corrected BigDecimal comparison
+        assertEquals("Pasta", resultList.get(1).getFoodName());
+        assertEquals(0, new BigDecimal("15.00").compareTo(resultList.get(1).getTotalRevenue())); // Corrected BigDecimal comparison
 
         // Verify
         verify(orderRepository, times(1)).findAllByStatusAndOrderTimeBetween(
@@ -351,12 +350,11 @@ class AdminDashboardServiceTest {
         )).thenReturn(Collections.emptyList());
 
         // Act
-        Page<TopPerformingItemDto> resultPage = adminDashboardService.getTopPerformingItems(startDate, endDate, pageable);
+        List<TopPerformingItemDto> resultList = adminDashboardService.getTopPerformingItems(startDate, endDate);
 
         // Assert
-        assertNotNull(resultPage);
-        assertTrue(resultPage.isEmpty());
-        assertEquals(0, resultPage.getTotalElements());
+        assertNotNull(resultList);
+        assertTrue(resultList.isEmpty());
 
         // Verify
         verify(orderRepository, times(1)).findAllByStatusAndOrderTimeBetween(
@@ -377,15 +375,15 @@ class AdminDashboardServiceTest {
         )).thenReturn(completedOrders);
 
         // Act
-        Page<TopPerformingCategoryDto> resultPage = adminDashboardService.getTopPerformingCategories(startDate, endDate, pageable);
+        List<TopPerformingCategoryDto> resultList = adminDashboardService.getTopPerformingCategories(startDate, endDate);
 
         // Assert
-        assertNotNull(resultPage);
-        assertEquals(2, resultPage.getTotalElements()); // Italian and Dessert
-        assertEquals("Italian", resultPage.getContent().get(0).getCategoryName());
-        assertEquals(0, new BigDecimal("20.00").compareTo(resultPage.getContent().get(0).getTotalRevenue())); // Corrected BigDecimal comparison
-        assertEquals("Dessert", resultPage.getContent().get(1).getCategoryName());
-        assertEquals(0, new BigDecimal("15.00").compareTo(resultPage.getContent().get(1).getTotalRevenue())); // Corrected BigDecimal comparison
+        assertNotNull(resultList);
+        assertEquals(2, resultList.size()); // Italian and Dessert
+        assertEquals("Italian", resultList.get(0).getCategoryName());
+        assertEquals(0, new BigDecimal("20.00").compareTo(resultList.get(0).getTotalRevenue())); // Corrected BigDecimal comparison
+        assertEquals("Dessert", resultList.get(1).getCategoryName());
+        assertEquals(0, new BigDecimal("15.00").compareTo(resultList.get(1).getTotalRevenue())); // Corrected BigDecimal comparison
 
         // Verify
         verify(orderRepository, times(1)).findAllByStatusAndOrderTimeBetween(
@@ -405,12 +403,11 @@ class AdminDashboardServiceTest {
         )).thenReturn(Collections.emptyList());
 
         // Act
-        Page<TopPerformingCategoryDto> resultPage = adminDashboardService.getTopPerformingCategories(startDate, endDate, pageable);
+        List<TopPerformingCategoryDto> resultList = adminDashboardService.getTopPerformingCategories(startDate, endDate);
 
         // Assert
-        assertNotNull(resultPage);
-        assertTrue(resultPage.isEmpty());
-        assertEquals(0, resultPage.getTotalElements());
+        assertNotNull(resultList);
+        assertTrue(resultList.isEmpty());
 
         // Verify
         verify(orderRepository, times(1)).findAllByStatusAndOrderTimeBetween(
@@ -431,15 +428,15 @@ class AdminDashboardServiceTest {
         )).thenReturn(completedOrders);
 
         // Act
-        Page<BusiestTableDto> resultPage = adminDashboardService.getBusiestTables(startDate, endDate, pageable);
+        List<BusiestTableDto> resultList = adminDashboardService.getBusiestTables(startDate, endDate);
 
         // Assert
-        assertNotNull(resultPage);
-        assertEquals(2, resultPage.getTotalElements()); // T1 and T2
-        assertEquals("T1", resultPage.getContent().get(0).getTableNumber());
-        assertEquals(2, resultPage.getContent().get(0).getOrderCount());
-        assertEquals("T2", resultPage.getContent().get(1).getTableNumber());
-        assertEquals(1, resultPage.getContent().get(1).getOrderCount());
+        assertNotNull(resultList);
+        assertEquals(2, resultList.size()); // T1 and T2
+        assertEquals("T1", resultList.get(0).getTableNumber());
+        assertEquals(2, resultList.get(0).getOrderCount());
+        assertEquals("T2", resultList.get(1).getTableNumber());
+        assertEquals(1, resultList.get(1).getOrderCount());
 
         // Verify
         verify(orderRepository, times(1)).findAllByStatusAndOrderTimeBetween(
@@ -459,12 +456,11 @@ class AdminDashboardServiceTest {
         )).thenReturn(Collections.emptyList());
 
         // Act
-        Page<BusiestTableDto> resultPage = adminDashboardService.getBusiestTables(startDate, endDate, pageable);
+        List<BusiestTableDto> resultList = adminDashboardService.getBusiestTables(startDate, endDate);
 
         // Assert
-        assertNotNull(resultPage);
-        assertTrue(resultPage.isEmpty());
-        assertEquals(0, resultPage.getTotalElements());
+        assertNotNull(resultList);
+        assertTrue(resultList.isEmpty());
 
         // Verify
         verify(orderRepository, times(1)).findAllByStatusAndOrderTimeBetween(

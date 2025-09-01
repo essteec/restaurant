@@ -20,4 +20,8 @@ public interface CategoryTranslationRepository extends JpaRepository<CategoryTra
     List<String> findDistinctLanguages();
 
     boolean existsByCategoryTranslationId_LanguageCode(String categoryTranslationIdLanguageCode);
+
+    boolean existsByCategoryTranslationId_CategoryIdAndCategoryTranslationId_LanguageCode(Long categoryTranslationIdCategoryId, String categoryTranslationIdLanguageCode);
+
+    List<CategoryTranslation> findByCategoryTranslationId_LanguageCode(String categoryTranslationIdLanguageCode);
 }

@@ -1,7 +1,7 @@
 package com.ste.restaurant.repository;
 
-import com.ste.restaurant.dto.OrderDto;
 import com.ste.restaurant.entity.*;
+import com.ste.restaurant.entity.enums.OrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

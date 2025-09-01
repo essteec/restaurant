@@ -37,12 +37,21 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth // "/rest/api/orders/**"
                         .requestMatchers("/actuator/**").permitAll()  // delete in prod
                         .requestMatchers(
-                                "/rest/api/auth/**",         // Authentication endpoints (login, register, etc.)
-                                "/v3/api-docs/**",           // Swagger/OpenAPI docs
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
+                                "/",
+                                "/index.html",
+                                "/static/**",
+                                "/assets/**",
                                 "/images/**",
-                                "/qr-codes/**"
+                                "/qr-codes/**",
+                                "/*.ico",
+                                "/*.png",
+                                "/*.jpg",
+                                "/*.gif",
+                                "/*.svg",
+                                "/rest/api/auth/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/rest/api/tables/available").permitAll()  // Public: get available tables
                         .requestMatchers(HttpMethod.GET, "/rest/api/menus/active").permitAll()      // Public: get active menus
@@ -50,8 +59,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/rest/api/food-items/*/categories").permitAll()
                         .requestMatchers(HttpMethod.GET, "/rest/api/languages/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/rest/api/users/*/addresses/**").hasRole("ADMIN")
-
-                        // --- DEFAULT RULE ---
+                        
+                        .requestMatchers(request -> !request.getServletPath().startsWith("/rest/api")).permitAll()
+                        
+                        // --- DEFAULT RULE for API endpoints only ---
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

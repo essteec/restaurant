@@ -225,4 +225,9 @@ public class FoodItemService {
         foodItemTranslationRepository.save(translation);
         return orderMapper.foodItemTranslationToFoodItemTranslationDto(translation);
     }
+
+    public Page<FoodItemDto> searchFoodItems(String query, Pageable pageable) {
+        Page<FoodItem> foodItems = foodItemRepository.findAllByFoodNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(query, query, pageable);
+        return foodItems.map(orderMapper::foodItemToFoodItemDto);
+    }
 }

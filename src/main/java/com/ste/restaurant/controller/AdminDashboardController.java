@@ -54,45 +54,42 @@ public class AdminDashboardController {
     }
 
     @GetMapping(path = "/top-items")
-    public Page<TopPerformingItemDto> getTopPerformingItems(
+    public List<TopPerformingItemDto> getTopPerformingItems(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @PageableDefault(size = 12, sort = "totalRevenue", direction = Sort.Direction.DESC) Pageable pageable) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         if (startDate == null) {
             startDate = LocalDate.of(2000, 1, 1);
         }
         if (endDate == null) {
             endDate = LocalDate.now();
         }
-        return dashboardService.getTopPerformingItems(startDate, endDate, pageable);
+        return dashboardService.getTopPerformingItems(startDate, endDate);
     }
 
     @GetMapping(path = "/top-categories")
-    public Page<TopPerformingCategoryDto> getTopPerformingCategories(
+    public List<TopPerformingCategoryDto> getTopPerformingCategories(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @PageableDefault(size = 12, sort = "totalRevenue", direction = Sort.Direction.DESC) Pageable pageable) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         if (startDate == null) {
             startDate = LocalDate.of(2000, 1, 1);
         }
         if (endDate == null) {
             endDate = LocalDate.now();
         }
-        return dashboardService.getTopPerformingCategories(startDate, endDate, pageable);
+        return dashboardService.getTopPerformingCategories(startDate, endDate);
     }
 
     @GetMapping(path = "/busiest-tables")
-    public Page<BusiestTableDto> getBusiestTables(
+    public List<BusiestTableDto> getBusiestTables(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @PageableDefault(size = 12, sort = "orderCount", direction = Sort.Direction.DESC) Pageable pageable) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         if (startDate == null) {
             startDate = LocalDate.of(2000, 1, 1);
         }
         if (endDate == null) {
             endDate = LocalDate.now();
         }
-        return dashboardService.getBusiestTables(startDate, endDate, pageable);
+        return dashboardService.getBusiestTables(startDate, endDate);
     }
 
     @GetMapping(path = "/revenue-heatmap")

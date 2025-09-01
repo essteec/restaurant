@@ -4,6 +4,9 @@ import com.ste.restaurant.dto.*;
 import com.ste.restaurant.dto.common.StringDto;
 import com.ste.restaurant.dto.common.WarningResponse;
 import com.ste.restaurant.entity.*;
+import com.ste.restaurant.entity.enums.OrderStatus;
+import com.ste.restaurant.entity.enums.TableStatus;
+import com.ste.restaurant.entity.enums.UserRole;
 import com.ste.restaurant.exception.*;
 import com.ste.restaurant.mapper.OrderMapper;
 import com.ste.restaurant.repository.*;
@@ -24,9 +27,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,6 +41,9 @@ class OrderServiceTest {
 
     @Mock
     private FoodItemRepository foodItemRepository;
+
+    @Mock
+    private MenuRepository menuRepository;
 
     @Mock
     private UserRepository userRepository;
@@ -338,6 +342,7 @@ class OrderServiceTest {
         when(userRepository.findByEmail("customer@test.com")).thenReturn(Optional.of(testCustomer));
         when(tableTopRepository.findByTableNumber("T01")).thenReturn(Optional.of(testTable));
         when(foodItemRepository.findByFoodName("Pizza")).thenReturn(Optional.of(testFoodItem));
+        when(menuRepository.existsByActiveAndFoodItemsContains(anyBoolean(), anySet())).thenReturn(true);
         when(orderMapper.orderItemDtoBasicToOrderItem(any())).thenReturn(testOrderItem);
         when(orderRepository.save(any(Order.class))).thenReturn(testOrder);
         when(orderMapper.orderToOrderDto(any(Order.class))).thenReturn(testOrderDto);
@@ -365,6 +370,7 @@ class OrderServiceTest {
         when(userRepository.findByEmail("customer@test.com")).thenReturn(Optional.of(testCustomer));
         when(addressRepository.findById(1L)).thenReturn(Optional.of(testAddress));
         when(foodItemRepository.findByFoodName("Pizza")).thenReturn(Optional.of(testFoodItem));
+        when(menuRepository.existsByActiveAndFoodItemsContains(anyBoolean(), anySet())).thenReturn(true);
         when(orderMapper.orderItemDtoBasicToOrderItem(any())).thenReturn(testOrderItem);
         when(orderRepository.save(any(Order.class))).thenReturn(testOrder);
         when(orderMapper.orderToOrderDto(any(Order.class))).thenReturn(testOrderDto);

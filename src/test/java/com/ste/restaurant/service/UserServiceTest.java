@@ -6,7 +6,7 @@ import com.ste.restaurant.dto.userdto.*;
 import com.ste.restaurant.entity.Address;
 import com.ste.restaurant.entity.Order;
 import com.ste.restaurant.entity.User;
-import com.ste.restaurant.entity.UserRole;
+import com.ste.restaurant.entity.enums.UserRole;
 import com.ste.restaurant.exception.*;
 import com.ste.restaurant.mapper.OrderMapper;
 import com.ste.restaurant.repository.AddressRepository;
@@ -324,7 +324,7 @@ class UserServiceTest {
         when(orderMapper.userToUserDto(testUser)).thenReturn(testUserDto);
 
         // Act
-        UserDto result = userService.updateUserById(1L, updateDto);
+        UserDto result = userService.updateUserById(1L, updateDto, "admin@example.com");
 
         // Assert
         assertThat(result).isNotNull();
@@ -340,7 +340,7 @@ class UserServiceTest {
         when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThatThrownBy(() -> userService.updateUserById(999L, testUserDtoEmployee))
+        assertThatThrownBy(() -> userService.updateUserById(999L, testUserDtoEmployee, "admin@example.com"))
                 .isInstanceOf(NotFoundException.class);
         verify(userRepository).findById(999L);
         verify(userRepository, never()).save(any());
@@ -359,7 +359,7 @@ class UserServiceTest {
         when(userRepository.findByEmail("existing@example.com")).thenReturn(Optional.of(existingUser));
 
         // Act & Assert
-        assertThatThrownBy(() -> userService.updateUserById(1L, updateDto))
+        assertThatThrownBy(() -> userService.updateUserById(1L, updateDto, "admin@example.com"))
                 .isInstanceOf(AlreadyExistsException.class);
         verify(userRepository).findById(1L);
         verify(userRepository).findByEmail("existing@example.com");
@@ -378,7 +378,7 @@ class UserServiceTest {
         when(orderMapper.userToUserDto(testUser)).thenReturn(testUserDto);
 
         // Act
-        UserDto result = userService.updateUserById(1L, updateDto);
+        UserDto result = userService.updateUserById(1L, updateDto, "admin@example.com");
 
         // Assert
         assertThat(result).isNotNull();
@@ -389,6 +389,25 @@ class UserServiceTest {
     }
 
     @Test
+    void updateUserById_cannotUpdateSelf() {
+        // Arrange
+        UserDtoEmployee updateDto = new UserDtoEmployee();
+        updateDto.setFirstName("Jane");
+        String currentUserEmail = "john.doe@example.com";
+        testUser.setEmail(currentUserEmail);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+
+        // Act & Assert
+        assertThatThrownBy(() -> userService.updateUserById(1L, updateDto, currentUserEmail))
+                .isInstanceOf(InvalidOperationException.class)
+                .hasMessageContaining("Cannot update own information");
+
+        verify(userRepository).findById(1L);
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
     void updateUserRoleById_success() {
         // Arrange
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
@@ -396,7 +415,7 @@ class UserServiceTest {
         when(orderMapper.userToUserDto(testUser)).thenReturn(testUserDto);
 
         // Act
-        UserDto result = userService.updateUserRoleById(1L, testStringDto);
+        UserDto result = userService.updateUserRoleById(1L, testStringDto, "admin@example.com");
 
         // Assert
         assertThat(result).isNotNull();
@@ -412,7 +431,7 @@ class UserServiceTest {
         testStringDto.setName(null);
 
         // Act & Assert
-        assertThatThrownBy(() -> userService.updateUserRoleById(1L, testStringDto))
+        assertThatThrownBy(() -> userService.updateUserRoleById(1L, testStringDto, "admin@example.com"))
                 .isInstanceOf(NullValueException.class);
         verify(userRepository, never()).findById(any());
     }
@@ -423,7 +442,7 @@ class UserServiceTest {
         when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThatThrownBy(() -> userService.updateUserRoleById(999L, testStringDto))
+        assertThatThrownBy(() -> userService.updateUserRoleById(999L, testStringDto, "admin@example.com"))
                 .isInstanceOf(NotFoundException.class);
         verify(userRepository).findById(999L);
         verify(userRepository, never()).save(any());
@@ -436,7 +455,7 @@ class UserServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
 
         // Act & Assert
-        assertThatThrownBy(() -> userService.updateUserRoleById(1L, testStringDto))
+        assertThatThrownBy(() -> userService.updateUserRoleById(1L, testStringDto, "admin@example.com"))
                 .isInstanceOf(InvalidValueException.class);
         verify(userRepository).findById(1L);
         verify(userRepository, never()).save(any());
@@ -449,7 +468,7 @@ class UserServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
 
         // Act & Assert
-        assertThatThrownBy(() -> userService.updateUserRoleById(1L, testStringDto))
+        assertThatThrownBy(() -> userService.updateUserRoleById(1L, testStringDto, "admin@example.com"))
                 .isInstanceOf(AlreadyHasException.class);
         verify(userRepository).findById(1L);
         verify(userRepository, never()).save(any());
@@ -467,7 +486,7 @@ class UserServiceTest {
         when(orderMapper.userToUserDto(testUser)).thenReturn(testUserDto);
 
         // Act
-        UserDto result = userService.updateUserRoleById(1L, testStringDto);
+        UserDto result = userService.updateUserRoleById(1L, testStringDto, "admin@example.com");
 
         // Assert
         assertThat(result).isNotNull();
@@ -489,7 +508,7 @@ class UserServiceTest {
         when(orderMapper.userToUserDto(testUser)).thenReturn(testUserDto);
 
         // Act
-        UserDto result = userService.updateUserRoleById(1L, testStringDto);
+        UserDto result = userService.updateUserRoleById(1L, testStringDto, "admin@example.com");
 
         // Assert
         assertThat(result).isNotNull();
@@ -497,6 +516,24 @@ class UserServiceTest {
         verify(userRepository).save(testUser);
         assertThat(testUser.getRole()).isEqualTo(UserRole.WAITER);
         assertThat(testUser.getSalary()).isEqualTo(BigDecimal.valueOf(3000.00)); // Salary should remain
+    }
+
+    @Test
+    void updateUserRoleById_cannotUpdateSelf() {
+        // Arrange
+        String currentUserEmail = "john.doe@example.com";
+        testUser.setEmail(currentUserEmail);
+        testStringDto.setName("ADMIN");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+
+        // Act & Assert
+        assertThatThrownBy(() -> userService.updateUserRoleById(1L, testStringDto, currentUserEmail))
+                .isInstanceOf(InvalidOperationException.class)
+                .hasMessageContaining("Cannot change own role");
+
+        verify(userRepository).findById(1L);
+        verify(userRepository, never()).save(any());
     }
 
     @Test

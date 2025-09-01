@@ -183,9 +183,7 @@ public class AdminDashboardControllerIntegrationTest {
                             .param("endDate", "2025-08-07")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content").isArray())
-                    .andExpect(jsonPath("$.pageable").exists())
-                    .andExpect(jsonPath("$.size").exists());
+                    .andExpect(jsonPath("$").isArray());
         }
 
         @Test
@@ -194,24 +192,7 @@ public class AdminDashboardControllerIntegrationTest {
             mockMvc.perform(get("/rest/api/admin/dashboard/top-items")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content").isArray())
-                    .andExpect(jsonPath("$.pageable").exists())
-                    .andExpect(jsonPath("$.size").exists());
-        }
-
-        @Test
-        @WithMockUser(username = "somer@restaurant.com", roles = "ADMIN")
-        void shouldSupportPaginationParameters() throws Exception {
-            mockMvc.perform(get("/rest/api/admin/dashboard/top-items")
-                            .param("startDate", "2025-01-01")
-                            .param("endDate", "2025-08-07")
-                            .param("page", "0")
-                            .param("size", "5")
-                            .param("sort", "totalRevenue,desc")
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content").isArray())
-                    .andExpect(jsonPath("$.pageable.pageSize").value(5));
+                    .andExpect(jsonPath("$").isArray());
         }
 
         @Test
@@ -249,20 +230,7 @@ public class AdminDashboardControllerIntegrationTest {
                             .param("endDate", "2025-08-07")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content").isArray())
-                    .andExpect(jsonPath("$.pageable").exists());
-        }
-
-        @Test
-        @WithMockUser(username = "somer@restaurant.com", roles = "ADMIN")
-        void shouldSupportCustomSorting() throws Exception {
-            mockMvc.perform(get("/rest/api/admin/dashboard/top-categories")
-                            .param("startDate", "2025-01-01")
-                            .param("endDate", "2025-08-07")
-                            .param("sort", "totalRevenue,asc")
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content").isArray());
+                    .andExpect(jsonPath("$").isArray());
         }
 
         @Test
@@ -290,19 +258,7 @@ public class AdminDashboardControllerIntegrationTest {
                             .param("endDate", "2025-08-07")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content").isArray())
-                    .andExpect(jsonPath("$.pageable").exists());
-        }
-
-        @Test
-        @WithMockUser(username = "somer@restaurant.com", roles = "ADMIN")
-        void shouldSupportDefaultSortingByOrderCount() throws Exception {
-            mockMvc.perform(get("/rest/api/admin/dashboard/busiest-tables")
-                            .param("startDate", "2025-01-01")
-                            .param("endDate", "2025-08-07")
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.sort.sorted").value(true));
+                    .andExpect(jsonPath("$").isArray());
         }
 
         @Test

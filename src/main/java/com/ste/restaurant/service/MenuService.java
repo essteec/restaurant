@@ -10,6 +10,16 @@ import com.ste.restaurant.exception.NullValueException;
 import com.ste.restaurant.mapper.OrderMapper;
 import com.ste.restaurant.repository.FoodItemRepository;
 import com.ste.restaurant.repository.MenuRepository;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -108,7 +118,7 @@ public class MenuService {
         return new WarningResponse<>(menuDtos, failedMenuNames);
     }
 
-    public List<CategoryDto> getActiveMenu(String langCode) {
+    public List<CategoryMenuDto> getActiveMenu(String langCode) {
         // Fetch active menus
         List<Menu> menus = menuRepository.findAllByActive(true);
 
@@ -118,7 +128,7 @@ public class MenuService {
         }
 
         // Build categories -> foodItems map, deduping foods by ID to avoid cycles and equals/hashCode on entities
-        Map<String, Set<FoodItemDto>> categoryMap = new LinkedHashMap<>();
+        Map<String, Set<FoodItemMenuDto>> categoryMap = new LinkedHashMap<>();
         Set<Long> seenFoodIds = new HashSet<>();
 
         for (Menu menu : menus) {
@@ -133,7 +143,8 @@ public class MenuService {
                 }
 
                 // map food -> dto with translation overlay
-                FoodItemDto foodItemDto = orderMapper.foodItemToFoodItemDto(food);
+                FoodItemMenuDto foodItemDto = orderMapper.foodItemToFoodItemMenuDto(food);
+                foodItemDto.setOriginalFoodName(food.getFoodName());
 
                 Map<String, FoodItemTranslation> translations = food.getTranslations();
                 if (translations != null) {
@@ -149,7 +160,7 @@ public class MenuService {
                 }
 
                 if (food.getImage() != null && !food.getImage().isBlank()) {
-                    foodItemDto.setImage("/images/" + food.getImage());
+                    foodItemDto.setImage(food.getImage());
                 }
 
                 // Place this food into all of its categories
@@ -176,7 +187,7 @@ public class MenuService {
         }
 
         return categoryMap.entrySet().stream()
-                .map(e -> new CategoryDto(e.getKey(), e.getValue()))
+                .map(e -> new CategoryMenuDto(e.getKey(), e.getValue()))
                 .collect(Collectors.toList());
     }
 

@@ -1,11 +1,11 @@
 package com.ste.restaurant.integration;
 
 import com.ste.restaurant.entity.CallRequest;
-import com.ste.restaurant.entity.RequestType;
-import com.ste.restaurant.entity.TableStatus;
+import com.ste.restaurant.entity.enums.RequestType;
+import com.ste.restaurant.entity.enums.TableStatus;
 import com.ste.restaurant.entity.TableTop;
 import com.ste.restaurant.entity.User;
-import com.ste.restaurant.entity.UserRole;
+import com.ste.restaurant.entity.enums.UserRole;
 import com.ste.restaurant.repository.CallRequestRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

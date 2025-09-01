@@ -3,7 +3,7 @@ package com.ste.restaurant.controller;
 import com.ste.restaurant.dto.OrderDto;
 import com.ste.restaurant.dto.OrderItemDto;
 import com.ste.restaurant.dto.common.StringDto;
-import com.ste.restaurant.entity.OrderStatus;
+import com.ste.restaurant.entity.enums.OrderStatus;
 import com.ste.restaurant.service.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;

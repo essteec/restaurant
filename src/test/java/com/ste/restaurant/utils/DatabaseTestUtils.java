@@ -1,6 +1,8 @@
 package com.ste.restaurant.utils;
 
 import com.ste.restaurant.entity.*;
+import com.ste.restaurant.entity.enums.TableStatus;
+import com.ste.restaurant.entity.enums.UserRole;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import java.math.BigDecimal;

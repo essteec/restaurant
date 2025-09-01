@@ -2,7 +2,7 @@ package com.ste.restaurant.integration;
 
 import com.ste.restaurant.entity.Address;
 import com.ste.restaurant.entity.User;
-import com.ste.restaurant.entity.UserRole;
+import com.ste.restaurant.entity.enums.UserRole;
 import com.ste.restaurant.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

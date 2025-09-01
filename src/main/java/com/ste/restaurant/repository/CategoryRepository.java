@@ -2,6 +2,8 @@ package com.ste.restaurant.repository;
 
 import com.ste.restaurant.entity.Category;
 import com.ste.restaurant.entity.FoodItem;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -20,4 +22,6 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     List<Category> findByFoodItemsIn(Set<FoodItem> foodItems);
 
     Category getCategoriesByCategoryName(String categoryName);
+
+    Page<Category> findAllByCategoryNameContainingIgnoreCase(String categoryName, Pageable pageable);
 }

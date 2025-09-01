@@ -97,4 +97,9 @@ public class FoodItemController {
     public FoodItemTranslationDto updateFoodItemTranslation(@PathVariable String name, @PathVariable String lang, @Valid @RequestBody FoodItemTranslationDto translationDto) {
         return foodItemService.updateFoodItemTranslation(name, lang, translationDto);
     }
+
+    @GetMapping(path = "/search")
+    public Page<FoodItemDto> searchFoodItems(@RequestParam String query, @PageableDefault(size = 20) Pageable pageable) {
+        return foodItemService.searchFoodItems(query, pageable);
+    }
 }

@@ -411,12 +411,13 @@ class MenuServiceTest {
         testMenu.setActive(true);
         List<Menu> activeMenus = Arrays.asList(testMenu);
         when(menuRepository.findAllByActive(true)).thenReturn(activeMenus);
-        when(orderMapper.foodItemToFoodItemDto(testFoodItem)).thenReturn(testFoodItemDto);
+        FoodItemMenuDto foodItemMenuDto = new FoodItemMenuDto();
+        when(orderMapper.foodItemToFoodItemMenuDto(testFoodItem)).thenReturn(foodItemMenuDto);
         when(languageService.countDistinctLanguages()).thenReturn(1L);
         when(languageService.existsByLanguageCode("en")).thenReturn(true);
 
         // Act
-        List<CategoryDto> result = menuService.getActiveMenu("en");
+        List<CategoryMenuDto> result = menuService.getActiveMenu("en");
 
         // Assert
         assertThat(result).isNotNull();
@@ -424,7 +425,7 @@ class MenuServiceTest {
         assertThat(result.get(0).getCategoryName()).isEqualTo("Main Course");
         assertThat(result.get(0).getFoodItems()).hasSize(1);
         verify(menuRepository).findAllByActive(true);
-        verify(orderMapper).foodItemToFoodItemDto(testFoodItem);
+        verify(orderMapper).foodItemToFoodItemMenuDto(testFoodItem);
         verify(languageService).countDistinctLanguages();
         verify(languageService).existsByLanguageCode("en");
     }
@@ -436,24 +437,22 @@ class MenuServiceTest {
         testFoodItem.setImage("pizza.jpg");
         List<Menu> activeMenus = Arrays.asList(testMenu);
         
-        FoodItemDto expectedFoodItemDto = new FoodItemDto();
-        expectedFoodItemDto.setFoodName("Pizza");
-        expectedFoodItemDto.setImage("/images/pizza.jpg");
+        FoodItemMenuDto foodItemMenuDto = new FoodItemMenuDto();
         
         when(menuRepository.findAllByActive(true)).thenReturn(activeMenus);
-        when(orderMapper.foodItemToFoodItemDto(testFoodItem)).thenReturn(testFoodItemDto);
+        when(orderMapper.foodItemToFoodItemMenuDto(testFoodItem)).thenReturn(foodItemMenuDto);
         when(languageService.countDistinctLanguages()).thenReturn(1L);
         when(languageService.existsByLanguageCode("en")).thenReturn(true);
 
         // Act
-        List<CategoryDto> result = menuService.getActiveMenu("en");
+        List<CategoryMenuDto> result = menuService.getActiveMenu("en");
 
         // Assert
         assertThat(result).isNotNull();
         assertThat(result).hasSize(1);
         // The image path should be modified by the service
         verify(menuRepository).findAllByActive(true);
-        verify(orderMapper).foodItemToFoodItemDto(testFoodItem);
+        verify(orderMapper).foodItemToFoodItemMenuDto(testFoodItem);
         verify(languageService).countDistinctLanguages();
         verify(languageService).existsByLanguageCode("en");
     }
@@ -466,7 +465,7 @@ class MenuServiceTest {
         when(languageService.existsByLanguageCode("en")).thenReturn(true);
 
         // Act
-        List<CategoryDto> result = menuService.getActiveMenu("en");
+        List<CategoryMenuDto> result = menuService.getActiveMenu("en");
 
         // Assert
         assertThat(result).isNotNull();

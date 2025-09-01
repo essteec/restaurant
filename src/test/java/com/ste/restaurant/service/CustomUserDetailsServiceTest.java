@@ -1,7 +1,7 @@
 package com.ste.restaurant.service;
 
 import com.ste.restaurant.entity.User;
-import com.ste.restaurant.entity.UserRole;
+import com.ste.restaurant.entity.enums.UserRole;
 import com.ste.restaurant.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

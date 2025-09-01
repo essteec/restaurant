@@ -4,7 +4,7 @@ import com.ste.restaurant.dto.auth.AuthRequest;
 import com.ste.restaurant.dto.auth.AuthResponse;
 import com.ste.restaurant.dto.userdto.UserDtoIO;
 import com.ste.restaurant.entity.User;
-import com.ste.restaurant.entity.UserRole;
+import com.ste.restaurant.entity.enums.UserRole;
 import com.ste.restaurant.exception.NotFoundException;
 import com.ste.restaurant.repository.UserRepository;
 import com.ste.restaurant.security.JwtUtil;

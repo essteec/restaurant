@@ -1,6 +1,6 @@
 package com.ste.restaurant.integration;
 
-import com.ste.restaurant.entity.TableStatus;
+import com.ste.restaurant.entity.enums.TableStatus;
 import com.ste.restaurant.entity.TableTop;
 import com.ste.restaurant.repository.TableTopRepository;
 import com.ste.restaurant.utils.DatabaseTestUtils;
