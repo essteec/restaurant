@@ -2,6 +2,7 @@ package com.ste.restaurant.controller;
 
 import com.ste.restaurant.dto.CategoryDtoBasic;
 import com.ste.restaurant.dto.FoodItemDto;
+import com.ste.restaurant.dto.FoodItemMenuDto;
 import com.ste.restaurant.dto.FoodItemTranslationDto;
 import com.ste.restaurant.entity.FoodItem;
 import com.ste.restaurant.service.FoodItemService;
@@ -101,5 +102,18 @@ public class FoodItemController {
     @GetMapping(path = "/search")
     public Page<FoodItemDto> searchFoodItems(@RequestParam String query, @PageableDefault(size = 20) Pageable pageable) {
         return foodItemService.searchFoodItems(query, pageable);
+    }
+
+    @PreAuthorize("permitAll()")
+    @GetMapping(path = "/most-popular")
+    public List<FoodItemMenuDto> getPopularFoodItems(@RequestHeader(value = "Accept-Language", defaultValue = "en") String langCode) {
+        return foodItemService.getPopularFoodItems(langCode);
+    }
+
+    // public landing page
+    @GetMapping(path = "/landing")
+    @PreAuthorize("permitAll()")
+    public List<FoodItemDto> getLandingPageFoodItems() {
+        return foodItemService.getLandingPageFoodItems();
     }
 }

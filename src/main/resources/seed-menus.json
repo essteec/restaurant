@@ -46,5 +46,11 @@
     "description": "Weekly specials that change every Monday.",
     "active": false,
     "foodItems": ["Mushroom Soup", "Veggie Burger", "Tomato Soup"]
+  },
+  {
+    "menuName": "Featured",
+    "description": "Featured items to be displayed on the main page.",
+    "active": false,
+    "foodItems": ["Cheeseburger", "Grilled Chicken", "Caesar Salad", "Lentil Soup", "Fish & Chips", "French Fries", "Steak", "Tiramisu"]
   }
 ]

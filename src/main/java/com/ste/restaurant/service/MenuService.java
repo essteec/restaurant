@@ -129,18 +129,14 @@ public class MenuService {
 
         // Build categories -> foodItems map, deduping foods by ID to avoid cycles and equals/hashCode on entities
         Map<String, Set<FoodItemMenuDto>> categoryMap = new LinkedHashMap<>();
-        Set<Long> seenFoodIds = new HashSet<>();
 
         for (Menu menu : menus) {
             if (menu == null || menu.getFoodItems() == null) continue;
             for (FoodItem food : menu.getFoodItems()) {
                 if (food == null) continue;
 
-                Long fid = food.getFoodId();
-                if (fid != null && !seenFoodIds.add(fid)) {
-                    // already processed this food for another menu
-                    // continue to map to its categories again (food can appear in multiple categories)
-                }
+                // already processed this food for another menu
+                // continue to map to its categories again (food can appear in multiple categories)
 
                 // map food -> dto with translation overlay
                 FoodItemMenuDto foodItemDto = orderMapper.foodItemToFoodItemMenuDto(food);
